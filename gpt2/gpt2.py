@@ -256,7 +256,7 @@ if __name__ == "__main__":
 
     if torch.cuda.device_count() > 1:
         print("Let's use", torch.cuda.device_count(), "GPUs!")
-        model = nn.DistributedDataParallel(model)
+        model = nn.parallel.DistributedDataParallel(model)
 
     model = model.to(device)
     # model = torch.compile(model)
