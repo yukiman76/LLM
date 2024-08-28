@@ -14,7 +14,7 @@ MAX_PAPER = 600
 def load_abstracts(topic="generative ai", number_paper=MAX_PAPER):
     sch = SemanticScholar()
     logger.info(f"search_paper {topic}")
-    papers = sch.search_paper(query=topic, year="2019-2024")
+    papers = sch.search_paper(query=topic, year="2020-2022")
     big_text = ""
     abstract_list = []
     logger.info("Loading Data")
