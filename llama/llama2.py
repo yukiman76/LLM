@@ -69,7 +69,7 @@ def generate_text(model, seed_text, num_tokens):
 
 if __name__ == "__main__":
     logger.info("load_abstracts")
-    big_text = load_abstracts("LLMs Generative AI", number_paper=4)
+    big_text, abstract = load_abstracts("LLMs Generative AI", number_paper=4)
     # Lowercase the text
     logger.info("big_text.lower")
     text = big_text.lower()
