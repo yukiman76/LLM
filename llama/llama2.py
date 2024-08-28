@@ -46,6 +46,21 @@ class LlamaModel(nn.Module):
         return output
 
 
+# Use the trained model to generate new text
+def generate_text(model, seed_text, num_tokens):
+    model.eval()  # Set the model to evaluation mode
+    with torch.no_grad():  # No need to track the gradients
+        tokens = [vocab[token] for token in tokenizer(seed_text)]
+        tokens = torch.tensor(tokens).unsqueeze(0).to(device)
+        for _ in range(num_tokens):
+            output = model(tokens)
+            probabilities = nn.functional.softmax(output[0, -1], dim=0)
+            next_token = torch.multinomial(probabilities, 1).item()
+            tokens = torch.cat([tokens, torch.tensor([[next_token]]).to(device)], dim=1)
+        generated_text = ' '.join(vocab.get_itos()[token] for token in tokens[0].cpu().numpy())
+        return generated_text
+
+
 if __name__ == "__main__":
     # Create the dataset and dataloader
     sequence_length = 30
@@ -79,3 +94,12 @@ if __name__ == "__main__":
         print(f'Epoch {epoch}, Loss {loss.item()}')
         if float(loss.item()) < 0.06:
             break
+
+    result = generate_text(model, human_input="Generative AI is ", num_tokens=100)
+    print(result)
+
+    def count_parameters(model):
+        return sum(p.numel() for p in model.parameters() if p.requires_grad)
+
+    print(f'The model has {count_parameters(model):,} trainable parameters')
+    print(f'The model has {len(vocab)} tokens')
