@@ -268,7 +268,8 @@ if __name__ == "__main__":
 
         logits, loss = model(xb, yb)
         optim.zero_grad(set_to_none=True)
-        loss.backward()
+        # grad can be implicitly created only for scalar outputs
+        loss.sum().backward()
 
         # gradient clipping
         torch.nn.utils.clip_grad_norm_(m.parameters(), max_norm=1)
