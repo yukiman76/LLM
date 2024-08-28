@@ -56,7 +56,7 @@ class LlamaModel(nn.Module):
 def generate_text(model, input_text, num_tokens):
     model.eval()  # Set the model to evaluation mode
     with torch.no_grad():  # No need to track the gradients
-        tokens = [vocab[token] for token in tokenizer(seed_text)]
+        tokens = [vocab[token] for token in tokenizer(input_text)]
         tokens = torch.tensor(tokens).unsqueeze(0).to(device)
         for _ in range(num_tokens):
             output = model(tokens)
