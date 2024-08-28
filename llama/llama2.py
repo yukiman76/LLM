@@ -62,18 +62,31 @@ def generate_text(model, seed_text, num_tokens):
 
 
 if __name__ == "__main__":
+    big_text = load_abstracts("LLMs Generative AI", number_paper=400)
+    # Lowercase the text
+    text = big_text.lower()
+    # Define the tokenizer
+    tokenizer = get_tokenizer('basic_english')
+    # Tokenize the text
+    tokenized_text = [list(tokenizer(text))]
+    # Build the vocabulary from the tokenized text
+    vocab = build_vocab_from_iterator(tokenized_text)
+
+    # Numericalize the text
+    numericalized_text = [vocab[token] for token in tokenized_text[0]]
     # Create the dataset and dataloader
     sequence_length = 30
     dataset = LlamaDataset(numericalized_text, sequence_length)
     dataloader = DataLoader(dataset, batch_size=128)
 
     # Initialize the model and the optimizer
-    model = LlamaModel(len(vocab), embed_size=128, hidden_size=256, num_layers=2, num_heads=8, dropout=0.1).to(device)
+    model = LlamaModel(len(vocab), embed_size=128, hidden_size=256,
+                       num_layers=2, num_heads=8, dropout=0.1)
 
     # If there are multiple GPUs, wrap the model with nn.DataParallel
-    if torch.cuda.device_count() > 1:
-        print("Let's use", torch.cuda.device_count(), "GPUs!")
-        model = nn.DataParallel(model)
+    # if torch.cuda.device_count() > 1:
+    #     print("Let's use", torch.cuda.device_count(), "GPUs!")
+    #     model = nn.DataParallel(model)
 
     model = model.to(device)
 
