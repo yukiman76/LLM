@@ -53,7 +53,7 @@ class LlamaModel(nn.Module):
 
 
 # Use the trained model to generate new text
-def generate_text(model, seed_text, num_tokens):
+def generate_text(model, input_text, num_tokens):
     model.eval()  # Set the model to evaluation mode
     with torch.no_grad():  # No need to track the gradients
         tokens = [vocab[token] for token in tokenizer(seed_text)]
@@ -128,7 +128,7 @@ if __name__ == "__main__":
             break
 
     logger.info("generate_text")
-    result = generate_text(model, human_input="Generative AI is ", num_tokens=100)
+    result = generate_text(model, input_text="Generative AI is ", num_tokens=100)
     print(result)
 
     def count_parameters(model):
