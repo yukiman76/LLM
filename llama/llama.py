@@ -70,7 +70,7 @@ def generate_text(model, input_text, num_tokens):
 if __name__ == "__main__":
     logger.info(f"System Configured for device {device}")
     logger.info("load_abstracts")
-    big_text, abstract = load_abstracts("LLMs Generative AI", number_paper=4)
+    big_text, abstract = load_abstracts("LLMs Generative AI", number_paper=600)
     # Lowercase the text
     logger.info("big_text.lower")
     text = big_text.lower()
