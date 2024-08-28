@@ -68,6 +68,7 @@ def generate_text(model, input_text, num_tokens):
 
 
 if __name__ == "__main__":
+    logger.info(f"System Configured for device {device}")
     logger.info("load_abstracts")
     big_text, abstract = load_abstracts("LLMs Generative AI", number_paper=4)
     # Lowercase the text
@@ -125,6 +126,7 @@ if __name__ == "__main__":
             optimizer.step()
         print(f'Epoch {epoch}, Loss {loss.item()}')
         if float(loss.item()) < 0.06:
+            logger.info("float Grad < 0.06")
             break
 
     logger.info("generate_text")
