@@ -1,3 +1,5 @@
+import sys
+import logging
 import torch
 from torch import nn
 from torch.utils.data import Dataset, DataLoader
@@ -5,6 +7,10 @@ from torchtext.data.utils import get_tokenizer
 from torchtext.vocab import build_vocab_from_iterator
 from torch.optim import Adam
 from data import load_abstracts, load_local_data # we get test data from here
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+logging.getLogger("httpx").setLevel(logging.WARNING)
 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -62,23 +68,32 @@ def generate_text(model, seed_text, num_tokens):
 
 
 if __name__ == "__main__":
+    logger.info("load_abstracts")
     big_text = load_abstracts("LLMs Generative AI", number_paper=4)
     # Lowercase the text
+    logger.info("big_text.lower")
     text = big_text.lower()
     # Define the tokenizer
+    logger.info("get_tokenizer")
     tokenizer = get_tokenizer('basic_english')
     # Tokenize the text
+    logger.info("tokenized_text")
     tokenized_text = [list(tokenizer(text))]
     # Build the vocabulary from the tokenized text
+    logger.info("build_vocab_from_iterator")
     vocab = build_vocab_from_iterator(tokenized_text)
 
+    logger.info("numericalized_text")
     # Numericalize the text
     numericalized_text = [vocab[token] for token in tokenized_text[0]]
     # Create the dataset and dataloader
     sequence_length = 30
+    logger.info("Loading LlamaDataset")
     dataset = LlamaDataset(numericalized_text, sequence_length)
+    logger.info("Loading DataLoader")
     dataloader = DataLoader(dataset, batch_size=128)
 
+    logger.info("Loading LlamaModel")
     # Initialize the model and the optimizer
     model = LlamaModel(len(vocab), embed_size=128, hidden_size=256,
                        num_layers=2, num_heads=8, dropout=0.1)
@@ -88,12 +103,16 @@ if __name__ == "__main__":
     #     print("Let's use", torch.cuda.device_count(), "GPUs!")
     #     model = nn.DataParallel(model)
 
+    logger.info(f"Setting model to device {device}")
     model = model.to(device)
 
+    logger.info("Loading optimizer")
     optimizer = Adam(model.parameters(), lr=0.001)
 
+    logger.info("Traning")
     # Train the model
     for epoch in range(80):
+        logger.info(f"{epoch}")
         for batch in dataloader:
             x, y = batch
             x = x.to(device)
@@ -108,11 +127,12 @@ if __name__ == "__main__":
         if float(loss.item()) < 0.06:
             break
 
+    logger.info("generate_text")
     result = generate_text(model, human_input="Generative AI is ", num_tokens=100)
     print(result)
 
     def count_parameters(model):
         return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
-    print(f'The model has {count_parameters(model):,} trainable parameters')
-    print(f'The model has {len(vocab)} tokens')
+    logger.info(f'The model has {count_parameters(model):,} trainable parameters')
+    logger.info(f'The model has {len(vocab)} tokens')
