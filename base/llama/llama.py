@@ -71,7 +71,7 @@ def generate_text(model, input_text, num_tokens):
 if __name__ == "__main__":
     logger.info(f"System Configured for device {device}")
     logger.info("load_abstracts")
-    big_text, abstract = load_abstracts("LLMs Generative AI", number_paper=600)
+    big_text, abstract = load_abstracts("LLMs Generative AI", number_paper=800)
     # Lowercase the text
     logger.info("big_text.lower")
     text = big_text.lower()
@@ -133,7 +133,7 @@ if __name__ == "__main__":
     logger.info("generate_text")
     torch.save(model, 'llama.pt')
 
-    result = generate_text(model, input_text="Generative AI is ", num_tokens=100)
+    result = generate_text(model, input_text="Generative AI is ", num_tokens=50)
     print(result)
 
     def count_parameters(model):

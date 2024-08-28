@@ -8,7 +8,7 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logging.getLogger("httpx").setLevel(logging.WARNING)
 
 
-MAX_PAPER = 600
+MAX_PAPER = 800
 
 @lru_cache
 def load_abstracts(topic="generative ai", number_paper=MAX_PAPER):
