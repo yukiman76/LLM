@@ -62,7 +62,7 @@ def generate_text(model, seed_text, num_tokens):
 
 
 if __name__ == "__main__":
-    big_text = load_abstracts("LLMs Generative AI", number_paper=400)
+    big_text = load_abstracts("LLMs Generative AI", number_paper=4)
     # Lowercase the text
     text = big_text.lower()
     # Define the tokenizer
