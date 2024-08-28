@@ -63,6 +63,7 @@ def generate_text(model, input_text, num_tokens):
             probabilities = nn.functional.softmax(output[0, -1], dim=0)
             next_token = torch.multinomial(probabilities, 1).item()
             tokens = torch.cat([tokens, torch.tensor([[next_token]]).to(device)], dim=1)
+
         generated_text = ' '.join(vocab.get_itos()[token] for token in tokens[0].cpu().numpy())
         return generated_text
 
