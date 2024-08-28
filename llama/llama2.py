@@ -73,7 +73,8 @@ if __name__ == "__main__":
             optimizer.zero_grad()
             y_pred = model(x)
             loss = nn.functional.cross_entropy(y_pred.view(-1, len(vocab)), y.view(-1))
-            loss.backward()
+            # grad can be implicitly created only for scalar outputs
+            loss.sum().backward()
             optimizer.step()
         print(f'Epoch {epoch}, Loss {loss.item()}')
         if float(loss.item()) < 0.06:
