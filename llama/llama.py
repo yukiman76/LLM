@@ -130,6 +130,8 @@ if __name__ == "__main__":
             break
 
     logger.info("generate_text")
+    torch.save(model, 'llama.pt')
+
     result = generate_text(model, input_text="Generative AI is ", num_tokens=100)
     print(result)
 
