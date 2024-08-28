@@ -281,7 +281,7 @@ if __name__ == "__main__":
             model.eval()
             with torch.no_grad():
                 xvb, yvb = eval_loader.get_batch()
-                _, e_loss = m(xvb, yvb)
+                _, e_loss = model(xvb, yvb)
 
             print(f"Epoch: {e}\ttrain_loss: {loss:.4f}\teval_loss: {e_loss:.4f}")
 
