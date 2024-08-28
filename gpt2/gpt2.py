@@ -253,9 +253,11 @@ class GPT(nn.Module):
 
 if __name__ == "__main__":
     model = GPT(vocab_size=vocab_size, d_model=d_model, n_heads=n_heads, n_layers=n_layers)
-    if torch.cuda.device_count() > 1:
-        print("Let's use", torch.cuda.device_count(), "GPUs!")
-        model = nn.DataParallel(model)
+
+    # if torch.cuda.device_count() > 1:
+    #     print("Let's use", torch.cuda.device_count(), "GPUs!")
+    #     model = nn.DataParallel(model)
+
     model = model.to(device)
     # model = torch.compile(model)
 
