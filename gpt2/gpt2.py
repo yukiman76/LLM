@@ -272,7 +272,7 @@ if __name__ == "__main__":
         loss.sum().backward()
 
         # gradient clipping
-        torch.nn.utils.clip_grad_norm_(m.parameters(), max_norm=1)
+        torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1)
 
         optim.step()
         scheduler.step()
@@ -295,4 +295,4 @@ if __name__ == "__main__":
         input = torch.tensor(
             tokenizer.encode("why is the sky blue "), dtype=torch.long, device=device
         ).unsqueeze(0)
-        print(m.generate(input, max_new_tokens=500)[0])
+        print(model.generate(input, max_new_tokens=500)[0])
