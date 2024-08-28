@@ -113,7 +113,7 @@ if __name__ == "__main__":
 
     logger.info("Traning")
     # Train the model
-    for epoch in range(80):
+    for epoch in range(400):
         logger.info(f"{epoch}")
         for batch in dataloader:
             x, y = batch
