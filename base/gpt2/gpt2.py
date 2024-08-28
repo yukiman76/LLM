@@ -17,7 +17,7 @@ device = "cpu"
 if torch.cuda.is_available():
     device = "cuda"
 
-data_dir = "data.txt"
+data_dir = "./data/data.txt"
 text = open(data_dir, "r").read()  # load all the data as simple string
 
 # convert our text data into tokenized tensor

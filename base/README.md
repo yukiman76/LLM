@@ -1,7 +1,7 @@
 **LLM Base Repository**
 =====================
 
-Welcome to the LLM  repository, where we develop, train and fine tune large language models to push the boundaries of natural language processing and understanding.
+Welcome to the LLM Base repository, where we develop and train large language models to push the boundaries of natural language processing and understanding.
 
 **About**
 --------
