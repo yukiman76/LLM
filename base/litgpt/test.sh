@@ -14,8 +14,8 @@ litgpt pretrain pythia-160m \
   --out_dir out/custom_model
 
 # 3) Chat with the model
-echo "Chat with the model"
-litgpt chat out/custom_model/final
+# echo "Chat with the model"
+# litgpt chat out/custom_model/final
 
 # 4) Deploy the model
 # litgpt serve out/custom_model/final
