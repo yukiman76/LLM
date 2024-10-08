@@ -121,11 +121,9 @@ def train():
     optimizer = Adam(model.parameters(), lr=0.001)
 
     # Train the model
-    for epoch in range(80):
+    for epoch in range(8):
         model.train()  # Set model to training mode
         for batch in data_loader:
-            # for batch in batchs:
-            #     print(batch)
             x, y = batch
             x = x.to(device)
             y = y.to(device)
