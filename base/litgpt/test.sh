@@ -12,6 +12,7 @@ litgpt pretrain pythia-160m \
   --data TextFiles \
   --data.train_data_path "data" \
   --out_dir out/custom_model
+  --max_seq_length 256
 
 # 3) Chat with the model
 # echo "Chat with the model"

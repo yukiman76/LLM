@@ -46,7 +46,8 @@ def create_dataloader_v2(sdir, tokenizer, batch_size=4, max_length=256,
 
     # Create dataloader
     dataloader = DataLoader(
-        dataset, batch_size=batch_size, shuffle=shuffle, drop_last=drop_last, num_workers=num_workers)
+        dataset, batch_size=batch_size, shuffle=shuffle,
+        drop_last=drop_last, num_workers=num_workers)
 
     return dataloader
 
@@ -90,7 +91,7 @@ class LlamaModel_simple(nn.Module):
         return output
 
 
-def train():
+def train(epochs=1):
     tokenizer = tiktoken.get_encoding("cl100k_base")
     vocab_size = tokenizer.n_vocab # Use tokenizer's vocab size
     embed_dim = 256  # Size of token embeddings
@@ -121,7 +122,7 @@ def train():
     optimizer = Adam(model.parameters(), lr=0.001)
 
     # Train the model
-    for epoch in range(8):
+    for epoch in range(epochs):
         model.train()  # Set model to training mode
         for batch in data_loader:
             x, y = batch
@@ -160,6 +161,9 @@ def count_parameters(model):
 if __name__ == "__main__":
     #git clone --depth=1 --branch=main https://github.com/mlschmitt/classic-books-markdown data && rm -rf data/.git
     model = train()
+
+    import IPython
+    IPython.embed()
 
     result = generate_text(model, human_input="Generative AI is ", num_tokens=100)
     print(result)
