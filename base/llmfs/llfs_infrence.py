@@ -26,7 +26,7 @@ def generate_text(model, tokenizer, seed_text, max_length=100):
         input_ids = tokenizer.encode(seed_text)
         input_ids_tensor = torch.tensor([input_ids]).to(device)
         generated_tokens = input_ids[:]
-        for _ in range(num_tokens):
+        for _ in range(max_length):
             output = model(input_ids_tensor)
             probabilities = nn.functional.softmax(output[0, -1], dim=0)
             next_token = torch.multinomial(probabilities, 1).item()
