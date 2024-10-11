@@ -6,7 +6,7 @@ import torch
 import tiktoken
 from torch import nn
 from importlib.metadata import version
-# Our tools 
+# Our tools
 from llfs_model import LlamaModel_simple, LlamaModel2
 
 pkgs = ["torch",
@@ -14,6 +14,8 @@ pkgs = ["torch",
        ]
 for p in pkgs:
     print(f"{p} version: {version(p)}")
+
+device: str = 'cuda' if torch.cuda.is_available() else ('mps' if torch.backends.mps.is_available() else 'cpu')
 
 torch.manual_seed(129)
 
