@@ -8,7 +8,9 @@ from torch import nn
 from torch.optim import Adam
 from importlib.metadata import version
 from torch.utils.data import Dataset, DataLoader, IterableDataset
-
+# our tools
+from llfs_infrence import generate_text, count_parameters
+from llfs_model import LlamaModel_simple, LlamaModel2
 
 pkgs = ["matplotlib",
         "torch",
@@ -54,41 +56,6 @@ def create_dataloader_v2(sdir, tokenizer, batch_size=4, max_length=256,
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"setting device to {device}")
-
-
-class LlamaModel2(nn.Module):
-    def __init__(self, vocab_size, embed_dim, hidden_dim, num_layers, num_heads, dropout):
-        super().__init__()
-        self.embedding = nn.Embedding(vocab_size, embed_dim)
-        self.transformer = nn.Transformer(
-            d_model=embed_dim,
-            nhead=num_heads,
-            num_encoder_layers=num_layers,
-            num_decoder_layers=num_layers,
-            dim_feedforward=hidden_dim,
-            dropout=dropout,
-        )
-        self.fc = nn.Linear(embed_dim, vocab_size)
-
-    def forward(self, x):
-        embedded = self.embedding(x)
-        output = self.transformer(embedded, embedded)
-        output = self.fc(output)
-        return output
-
-
-class LlamaModel_simple(nn.Module):
-    def __init__(self, vocab_size, embed_size, hidden_size, num_layers, num_heads, dropout):
-        super().__init__()
-        self.embedding = nn.Embedding(vocab_size, embed_size)
-        self.rnn = nn.GRU(embed_size, hidden_size, num_layers)
-        self.fc = nn.Linear(hidden_size, vocab_size)
-
-    def forward(self, x):
-        embedded = self.embedding(x)
-        output, _ = self.rnn(embedded)
-        output = self.fc(output)
-        return output
 
 
 def train(epochs=1):
@@ -139,32 +106,6 @@ def train(epochs=1):
 
     torch.save(model, './llmfs.pt')
     return model, tokenizer
-
-
-def generate_text(model, tokenizer, seed_text, max_length=100):
-    model.eval()  # Set the model to evaluation mode
-    with torch.no_grad():  # No need to track the gradientsi
-        input_ids = tokenizer.encode(seed_text)
-        input_ids_tensor = torch.tensor([input_ids]).to(device)
-        generated_tokens = input_ids[:]
-        for _ in range(num_tokens):
-            output = model(input_ids_tensor)
-            probabilities = nn.functional.softmax(output[0, -1], dim=0)
-            next_token = torch.multinomial(probabilities, 1).item()
-            generated_tokens.append(next_token)
-            # if next_token == tokenizer.eos_token_id:
-            #     break
-            if len(generated_tokens) >= max_length:
-                break
-            input_ids_tensor = torch.cat([input_ids_tensor, torch.tensor([[next_token]]).to(device)], dim=1)
-
-        return tokenizer.decode(generated_tokens)
-
-
-def count_parameters(model):
-    i = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    print(f'The model has {i:,} trainable parameters')
-    return i
 
 
 if __name__ == "__main__":
