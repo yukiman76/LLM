@@ -42,7 +42,7 @@ def generate_text(model, tokenizer, seed_text, max_length=100):
 
 def count_parameters(model):
     i = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    print(f'The model has {i:,} trainable parameters')
+    # print(f'The model has {i:,} trainable parameters')
     return i
 
 
