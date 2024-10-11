@@ -50,13 +50,10 @@ if __name__ == "__main__":
     model = torch.load('llmfs_test.pt')
     tokenizer = tiktoken.get_encoding("cl100k_base")
 
-    import IPython
-    IPython.embed()
+    print(f'The model has {count_parameters(model):,} trainable parameters')
 
     result = generate_text(model, tokenizer, seed_text="in the begining ", max_length=100)
     print(result)
-
-    print(f'The model has {count_parameters(model):,} trainable parameters')
 
     import IPython
     IPython.embed()
