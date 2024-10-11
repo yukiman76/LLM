@@ -169,7 +169,7 @@ def count_parameters(model):
 
 if __name__ == "__main__":
     #git clone --depth=1 --branch=main https://github.com/mlschmitt/classic-books-markdown data && rm -rf data/.git
-    model, tokenizer = train()
+    model, tokenizer = train(8)
 
     import IPython
     IPython.embed()
