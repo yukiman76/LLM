@@ -138,34 +138,43 @@ def train(epochs=1):
             break
 
     torch.save(model, './llmfs.pt')
-    return model
+    return model, tokenizer
 
 
-def generate_text(model, seed_text, num_tokens):
+def generate_text(model, tokenizer, seed_text, max_length=100):
     model.eval()  # Set the model to evaluation mode
-    with torch.no_grad():  # No need to track the gradients
-        tokens = [vocab[token] for token in tokenizer(seed_text)]
-        tokens = torch.tensor(tokens).unsqueeze(0).to(device)
+    with torch.no_grad():  # No need to track the gradientsi
+        input_ids = tokenizer.encode(seed_text)
+        input_ids_tensor = torch.tensor([input_ids]).to(device)
+        generated_tokens = input_ids[:]
         for _ in range(num_tokens):
-            output = model(tokens)
+            output = model(input_ids_tensor)
             probabilities = nn.functional.softmax(output[0, -1], dim=0)
             next_token = torch.multinomial(probabilities, 1).item()
-            tokens = torch.cat([tokens, torch.tensor([[next_token]]).to(device)], dim=1)
-        generated_text = ' '.join(vocab.get_itos()[token] for token in tokens[0].cpu().numpy())
-        return generated_text
+            generated_tokens.append(next_token)
+            # if next_token == tokenizer.eos_token_id:
+            #     break
+            if len(generated_tokens) >= max_length:
+                break
+            input_ids_tensor = torch.cat([input_ids_tensor, torch.tensor([[next_token]]).to(device)], dim=1)
+
+        return tokenizer.decode(generated_tokens)
 
 
 def count_parameters(model):
-    return sum(p.numel() for p in model.parameters() if p.requires_grad)
+    i = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    print(f'The model has {i:,} trainable parameters')
+    return i
+
 
 if __name__ == "__main__":
     #git clone --depth=1 --branch=main https://github.com/mlschmitt/classic-books-markdown data && rm -rf data/.git
-    model = train()
+    model, tokenizer = train()
 
     import IPython
     IPython.embed()
 
-    result = generate_text(model, human_input="Generative AI is ", num_tokens=100)
+    result = generate_text(model, tokenizer, seed_text="in the begining ", max_length=100)
     print(result)
 
     print(f'The model has {count_parameters(model):,} trainable parameters')
