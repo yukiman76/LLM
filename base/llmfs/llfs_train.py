@@ -61,14 +61,23 @@ print(f"setting device to {device}")
 def train(epochs=1):
     tokenizer = tiktoken.get_encoding("cl100k_base")
     vocab_size = tokenizer.n_vocab # Use tokenizer's vocab size
-    embed_dim = 256  # Size of token embeddings
-    num_heads = 8  # Number of attention heads in transformer
-    hidden_dim = 2048  # Size of feedforward layer
-    num_layers = 12  # Number of transformer layers
-    max_seq_length = 512  # Maximum sequence length (context_length)
+    # -- ver 2
+    # embed_dim = 256  # Size of token embeddings
+    # num_heads = 8  # Number of attention heads in transformer
+    # hidden_dim = 2048  # Size of feedforward layer
+    # num_layers = 12  # Number of transformer layers
+    # max_seq_length = 512  # Maximum sequence length (context_length)
+    # dropout=0.1
+    # -- ver 3, LLama3
+    embed_dim = 256 # Size of token embeddings
+    num_heads = 32 # Number of attention heads in transformer
+    hidden_dim = 4096  # Size of feedforward layer
+    num_layers = 32 # Number of transformer layers
+    max_seq_length = 2048  # Maximum sequence length (context_length)
     dropout=0.1
-    directory_path = 'data'
 
+
+    directory_path = 'data'
 
     data_loader = create_dataloader_v2(directory_path, tokenizer, batch_size=8,
                                        max_length=max_seq_length, stride=max_seq_length)
