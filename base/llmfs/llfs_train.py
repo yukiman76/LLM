@@ -124,7 +124,7 @@ if __name__ == "__main__":
     import IPython
     IPython.embed()
 
-    result = generate_text(model, tokenizer, seed_text="in the begining ", max_length=100)
+    result = generate_text(model, tokenizer, seed_text="in the beginning ", max_length=100)
     print(result)
 
     print(f'The model has {count_parameters(model):,} trainable parameters')
