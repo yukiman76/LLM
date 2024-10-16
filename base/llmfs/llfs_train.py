@@ -68,17 +68,18 @@ def train(epochs=1):
     # num_layers = 12  # Number of transformer layers
     # max_seq_length = 512  # Maximum sequence length (context_length)
     # dropout=0.1
-    # -- ver 3, LLama3
-    # A6000
+
+    # -- ver 3, LLama3 Nvidia 2x V100  32G
     # embed_dim = 256 # Size of token embeddings
     # num_heads = 32 # Number of attention heads in transformer
     # hidden_dim = 4096  # Size of feedforward layer
     # num_layers = 32 # Number of transformer layers
     # max_seq_length = 1024 # vMEM poor -  2048  # Maximum sequence length (context_length)
     # dropout=0.1
-    # nvidia 4090
+
+    # -- ver 3, LLama3 nvidia 4 x 4090 24G
     embed_dim = 256  # Size of token embeddings
-    num_heads = 8  # Number of attention heads in transformer
+    num_heads = 16  # Number of attention heads in transformer
     hidden_dim = 2048  # Size of feedforward layer
     num_layers = 16  # Number of transformer layers
     max_seq_length = 256  # Maximum sequence length (context_length)
