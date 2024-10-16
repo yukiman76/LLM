@@ -76,7 +76,6 @@ dependencies:
   - poppler-data=0.4.11=h06a4308_1
   - python=3.10.14=h955ad1f_1
   - readline=8.2=h5eee18b_0
-  - setuptools=75.1.0=py310h06a4308_0
   - sqlite=3.45.3=h5eee18b_0
   - tk=8.6.14=h39e8969_0
   - wheel=0.44.0=py310h06a4308_0
