@@ -79,7 +79,7 @@ def train(epochs=1):
     # nvidia 4090
     embed_dim = 256  # Size of token embeddings
     num_heads = 8  # Number of attention heads in transformer
-    hidden_dim = 1048  # Size of feedforward layer
+    hidden_dim = 2048  # Size of feedforward layer
     num_layers = 6  # Number of transformer layers
     max_seq_length = 256  # Maximum sequence length (context_length)
     dropout=0.1
