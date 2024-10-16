@@ -30,7 +30,7 @@ class GPTDatasetV2(IterableDataset):
         self.stride = stride
 
     def __iter__(self):
-        for filename in glob.glob(f"{self.directory}/**/*"):
+        for filename in glob.glob(f"{self.directory}/**/*.md", recursive=True):
             print(filename)
             with open(filename, 'r') as f:
                 txt = f.read()
