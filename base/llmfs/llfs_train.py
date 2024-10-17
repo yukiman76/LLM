@@ -107,7 +107,7 @@ def train(epochs=1):
             num_heads = 32  # Number of attention heads in transformer
             hidden_dim = 4096  # Size of feedforward layer
             num_layers = 32  # Number of transformer layers
-            max_seq_length = 512  # Maximum sequence length (context_length)
+            max_seq_length = 1024  # Maximum sequence length (context_length)
             dropout=0.1
     else:
         print("Using default")
