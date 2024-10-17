@@ -90,7 +90,8 @@ def train(epochs=1):
         dropout=0.1
 
         # -- ver 3, LLama3 Nvidia 2x V100  32G
-        if "V100" in torch.cuda.get_device_name(0):
+        if "V100" in torch.cuda.get_device_name(0)
+            print("Using Nvidia V100 GPU config"):
             embed_dim = 256 # Size of token embeddings
             num_heads = 32 # Number of attention heads in transformer
             hidden_dim = 4096  # Size of feedforward layer
@@ -99,6 +100,7 @@ def train(epochs=1):
             dropout=0.1
 
         if "4090" in torch.cuda.get_device_name(0):
+            print("Using Nvidia 4090 GPU config")
             # -- ver 3, LLama3 nvidia 4 x 4090 24G
             embed_dim = 256  # Size of token embeddings
             num_heads = 32  # Number of attention heads in transformer
