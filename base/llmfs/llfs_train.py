@@ -5,6 +5,7 @@ import glob
 import torch
 import tiktoken
 from torch import nn
+from tqdm import tqdm
 from torch.optim import Adam
 from importlib.metadata import version
 from torch.utils.data import Dataset, DataLoader, IterableDataset
@@ -28,17 +29,23 @@ class GPTDatasetV2(IterableDataset):
         self.tokenizer = tokenizer
         self.max_length = max_length
         self.stride = stride
+        self.i_len = len(glob.glob(f"{self.directory}/**/*.md", recursive=True))
 
     def __iter__(self):
-        for filename in glob.glob(f"{self.directory}/**/*.md", recursive=True):
-            print(filename)
-            with open(filename, 'r') as f:
-                txt = f.read()
-                token_ids = self.tokenizer.encode(txt, allowed_special={"<|endoftext|>"})
-                for i in range(0, len(token_ids) - self.max_length, self.stride):
-                    input_chunk = token_ids[i:i + self.max_length]
-                    target_chunk = token_ids[i + 1: i + self.max_length + 1]
-                    yield torch.tensor(input_chunk), torch.tensor(target_chunk)
+        docs = glob.glob(f"{self.directory}/**/*.md", recursive=True)
+        with tqdm(docs, unit="document") as tqdocs:
+            for filename in tqdocs:
+                with open(filename, 'r') as f:
+                    txt = f.read()
+                    token_ids = self.tokenizer.encode(txt, allowed_special={"<|endoftext|>"})
+                    for i in range(0, len(token_ids) - self.max_length, self.stride):
+                        input_chunk = token_ids[i:i + self.max_length]
+                        target_chunk = token_ids[i + 1: i + self.max_length + 1]
+                        yield torch.tensor(input_chunk), torch.tensor(target_chunk)
+
+    def size(self):
+        return self.i_len
+
 
 def create_dataloader_v2(sdir, tokenizer, batch_size=4, max_length=256,
                          stride=128, shuffle=False, drop_last=True, num_workers=0):
@@ -54,47 +61,67 @@ def create_dataloader_v2(sdir, tokenizer, batch_size=4, max_length=256,
     return dataloader
 
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print(f"setting device to {device}")
+    
+device: str = 'cuda' if torch.cuda.is_available() else ('mps' if torch.backends.mps.is_available() else 'cpu')
+print(f"setting device to {device}\n")
+
+
+# Function to compute accuracy
+def compute_accuracy(preds, labels):
+    # Get the index of the max log-probability
+    _, predicted = torch.max(preds, dim=-1)
+    correct = (predicted == labels).float()
+    accuracy = correct.sum() / len(labels)
+    return accuracy.item()
 
 
 def train(epochs=1):
     tokenizer = tiktoken.get_encoding("cl100k_base")
     vocab_size = tokenizer.n_vocab # Use tokenizer's vocab size
-    # -- ver 2
-    # embed_dim = 256  # Size of token embeddings
-    # num_heads = 8  # Number of attention heads in transformer
-    # hidden_dim = 2048  # Size of feedforward layer
-    # num_layers = 12  # Number of transformer layers
-    # max_seq_length = 512  # Maximum sequence length (context_length)
-    # dropout=0.1
+    batch_size = 8
+    # TODO: refactor to a prams class 
+    if device == 'cuda':
+        # -- ver 2
+        embed_dim = 256  # Size of token embeddings
+        num_heads = 8  # Number of attention heads in transformer
+        hidden_dim = 2048  # Size of feedforward layer
+        num_layers = 12  # Number of transformer layers
+        max_seq_length = 512  # Maximum sequence length (context_length)
+        dropout=0.1
 
-    # -- ver 3, LLama3 Nvidia 2x V100  32G
-    # embed_dim = 256 # Size of token embeddings
-    # num_heads = 32 # Number of attention heads in transformer
-    # hidden_dim = 4096  # Size of feedforward layer
-    # num_layers = 32 # Number of transformer layers
-    # max_seq_length = 1024 # vMEM poor -  2048  # Maximum sequence length (context_length)
-    # dropout=0.1
+        # -- ver 3, LLama3 Nvidia 2x V100  32G
+        if "V100" in torch.cuda.get_device_name(0):
+            embed_dim = 256 # Size of token embeddings
+            num_heads = 32 # Number of attention heads in transformer
+            hidden_dim = 4096  # Size of feedforward layer
+            num_layers = 32 # Number of transformer layers
+            max_seq_length = 2048 # vMEM poor -  2048  # Maximum sequence length (context_length)
+            dropout=0.1
 
-    # -- ver 3, LLama3 nvidia 4 x 4090 24G
-    embed_dim = 256  # Size of token embeddings
-    num_heads = 32  # Number of attention heads in transformer
-    hidden_dim = 4096  # Size of feedforward layer
-    num_layers = 32  # Number of transformer layers
-    max_seq_length = 512  # Maximum sequence length (context_length)
-    dropout=0.1
-
+        if "4090" in torch.cuda.get_device_name(0):
+            # -- ver 3, LLama3 nvidia 4 x 4090 24G
+            embed_dim = 256  # Size of token embeddings
+            num_heads = 32  # Number of attention heads in transformer
+            hidden_dim = 4096  # Size of feedforward layer
+            num_layers = 32  # Number of transformer layers
+            max_seq_length = 512  # Maximum sequence length (context_length)
+            dropout=0.1
+    else:
+        print("Using default")
+        # -- ver 3, LLama3 nvidia 4 x 4090 24G
+        embed_dim = 256  # Size of token embeddings
+        num_heads = 32  # Number of attention heads in transformer
+        hidden_dim = 4096  # Size of feedforward layer
+        num_layers = 32  # Number of transformer layers
+        max_seq_length = 512  # Maximum sequence length (context_length)
+        dropout=0.1 
 
     directory_path = 'data'
 
-    data_loader = create_dataloader_v2(directory_path, tokenizer, batch_size=8,
+    data_loader = create_dataloader_v2(directory_path, tokenizer, batch_size=batch_size,
                                        max_length=max_seq_length, stride=max_seq_length)
 
-
     model = LlamaModel2(vocab_size, embed_dim, hidden_dim, num_layers, num_heads, dropout)
-
-    device: str = 'cuda' if torch.cuda.is_available() else ('mps' if torch.backends.mps.is_available() else 'cpu')
 
 
     # If there are multiple GPUs, wrap the model with nn.DataParallel
@@ -104,25 +131,49 @@ def train(epochs=1):
 
     model = model.to(device)
 
+    criterion = nn.CrossEntropyLoss()
     optimizer = Adam(model.parameters(), lr=0.001)
 
+    model.train()  # Set model to training mode
+    batch_idx = 0
     # Train the model
     for epoch in range(epochs):
-        model.train()  # Set model to training mode
-        for batch in data_loader:
-            x, y = batch
-            x = x.to(device)
-            y = y.to(device)
-            optimizer.zero_grad()
-            y_pred = model(x)
-            loss = nn.functional.cross_entropy(y_pred.view(-1, vocab_size), y.view(-1))
-            loss.backward()
-            optimizer.step()
-        print(f'Epoch {epoch}, Loss {loss.item()}')
-        if float(loss.item()) < 0.06:
-            break
+        total_batches = data_loader.dataset.size()
+        with tqdm(data_loader, unit="batch") as tepoch:
+            for data, target in tepoch:
+                tepoch.set_description(f"Epoch {epoch}")
+                
+                data, target = data.to(device), target.to(device)
+                optimizer.zero_grad()
+                output = model(data)
 
-    torch.save(model, './llmfs.pt')
+                output = output.view(-1, vocab_size)
+                target = target.view(-1)
+                # loss = nn.functional.cross_entropy(output.view(-1, vocab_size), target.view(-1))
+                loss = criterion(output, target)
+
+                # import IPython
+                # IPython.embed()
+
+                loss.backward()
+                optimizer.step()
+                
+                accuracy = compute_accuracy(output, target)
+
+                # print(f'Epoch {epoch}, Loss {loss.item()}')
+                if float(loss.item()) < 0.06:
+                    break
+
+                # if batch_idx % 100 == 99:  # Print every 100 batches
+                #     print(f'Epoch [{epoch+1}/{epochs}], Step [{batch_idx+1}/{total_batches}], Loss: {running_loss/100:.4f}, Accuracy: {running_accuracy/100:.4f}')
+                #     running_loss = 0.0
+                #     running_accuracy = 0.0
+
+                batch_idx += 1
+                tepoch.set_postfix(loss=loss.item(), accuracy=100. * accuracy)
+
+
+    torch.save(model.state_dict(), './llmfs_weights.pth')
     return model, tokenizer
 
 

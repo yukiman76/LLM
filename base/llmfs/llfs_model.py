@@ -14,6 +14,7 @@ class LlamaModel2(nn.Module):
         super().__init__()
         self.embedding = nn.Embedding(vocab_size, embed_dim)
         self.transformer = nn.Transformer(
+            batch_first=True, # remove warning
             d_model=embed_dim,
             nhead=num_heads,
             num_encoder_layers=num_layers,

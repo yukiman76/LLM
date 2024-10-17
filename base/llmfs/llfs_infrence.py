@@ -47,13 +47,28 @@ def count_parameters(model):
 
 
 if __name__ == "__main__":
-    model = torch.load('llmfs_test.pt')
-    tokenizer = tiktoken.get_encoding("cl100k_base")
+    device: str = 'cuda' if torch.cuda.is_available() else ('mps' if torch.backends.mps.is_available() else 'cpu')
+    print(f"setting device to {device}\n\n")
 
-    print(f'The model has {count_parameters(model):,} trainable parameters')
+    tokenizer = tiktoken.get_encoding("cl100k_base")
+    vocab_size = tokenizer.n_vocab # Use tokenizer's vocab size
+    batch_size = 8
+    embed_dim = 256  # Size of token embeddings
+    num_heads = 32  # Number of attention heads in transformer
+    hidden_dim = 4096  # Size of feedforward layer
+    num_layers = 32  # Number of transformer layers
+    max_seq_length = 512  # Maximum sequence length (context_length)
+    dropout=0.1
+
+    model = LlamaModel2(vocab_size, embed_dim, hidden_dim, num_layers, num_heads, dropout)
+    model.load_state_dict(torch.load('llmfs_weights.pth', weights_only=True))
+    model = model.to(device)
+
+    print(f'The model has {count_parameters(model):,} trainable parameters\n')
 
     result = generate_text(model, tokenizer, seed_text="in the begining ", max_length=100)
     print(result)
-
+    print("\n\n")
+     
     import IPython
     IPython.embed()
