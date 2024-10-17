@@ -101,13 +101,13 @@ def train(epochs=1):
 
         if "4090" in torch.cuda.get_device_name(0):
             print("Using Nvidia 4090 GPU config")
-            batch_size = 8
+            batch_size = 10
             # -- ver 3, LLama3 nvidia 4 x 4090 24G
             embed_dim = 256  # Size of token embeddings
             num_heads = 32  # Number of attention heads in transformer
             hidden_dim = 4096  # Size of feedforward layer
             num_layers = 32  # Number of transformer layers
-            max_seq_length = 1024  # Maximum sequence length (context_length)
+            max_seq_length = 512  # Maximum sequence length (context_length)
             dropout=0.1
     else:
         print("Using default")
