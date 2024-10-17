@@ -101,7 +101,7 @@ def train(epochs=1):
 
         if "4090" in torch.cuda.get_device_name(0):
             print("Using Nvidia 4090 GPU config")
-            batch_size = 10
+            batch_size = 8
             # -- ver 3, LLama3 nvidia 4 x 4090 24G
             embed_dim = 256  # Size of token embeddings
             num_heads = 32  # Number of attention heads in transformer
