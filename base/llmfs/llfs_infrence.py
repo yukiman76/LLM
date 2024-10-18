@@ -8,6 +8,8 @@ from torch import nn
 from importlib.metadata import version
 # Our tools
 from llfs_model import LlamaModel_simple, LlamaModel2
+from llfs_config import get_config
+
 
 pkgs = ["torch",
         "tiktoken"
@@ -52,14 +54,15 @@ if __name__ == "__main__":
 
     tokenizer = tiktoken.get_encoding("cl100k_base")
     vocab_size = tokenizer.n_vocab # Use tokenizer's vocab size
-    batch_size = 8
-    embed_dim = 256  # Size of token embeddings
-    num_heads = 32  # Number of attention heads in transformer
-    hidden_dim = 4096  # Size of feedforward layer
-    num_layers = 32  # Number of transformer layers
-    max_seq_length = 512  # Maximum sequence length (context_length)
-    dropout=0.1
+    config = get_config()
 
+    batch_size = config['batch_size']
+    embed_dim = config['embed_dim']
+    num_heads = config['num_heads']
+    hidden_dim =config['hidden_dim']
+    num_layers = config['num_layers']
+    max_seq_length = config['max_seq_length']
+    dropout = config['dropout']
     model = LlamaModel2(vocab_size, embed_dim, hidden_dim, num_layers, num_heads, dropout)
     model.load_state_dict(torch.load('llmfs_weights.pth', weights_only=True))
     model = model.to(device)

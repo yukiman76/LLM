@@ -2,3 +2,4 @@ tiktoken
 torch
 matplotlib
 accelerate
+IPython
