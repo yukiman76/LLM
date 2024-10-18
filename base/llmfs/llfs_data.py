@@ -39,12 +39,12 @@ def create_dataloader(sdir, tokenizer, batch_size=4, max_length=256,stride=128,
 
     # Create dataset
     dataset = GPTDatasetV2(sdir, tokenizer, max_length, stride)
-
-    if torch.cuda.device_count() > 1:
-        sampler = DistributedSampler(dataset, num_replicas=world_size, rank=rank, shuffle=False, 
-                                     drop_last=False)
-    else:
-        sampler = None
+    sampler = None
+    
+    # if torch.cuda.device_count() > 1:
+    #     sampler = DistributedSampler(dataset, num_replicas=world_size, rank=rank, shuffle=False, 
+    #                                  drop_last=False)
+       
     
     # Create dataloader
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, pin_memory=False,
