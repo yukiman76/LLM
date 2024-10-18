@@ -27,6 +27,9 @@ for p in pkgs:
 
 torch.manual_seed(129)
 
+if torch.cuda.device_count() > 1:
+    dist.init_process_group(backend="nccl")  # Assuming using NCCL backend
+
 gpu_ok = False
 if torch.cuda.is_available():
     device_cap = torch.cuda.get_device_capability()
@@ -77,7 +80,10 @@ def create_dataloader_v2(sdir, tokenizer, batch_size=4, max_length=256,
     # Create dataset
     dataset = GPTDatasetV2(sdir, tokenizer, max_length, stride)
 
-    sampler = DistributedSampler(dataset)
+    if torch.cuda.device_count() > 1:
+        sampler = DistributedSampler(dataset)
+    else:
+        sampler = None
     
     # Create dataloader
     dataloader = DataLoader(
@@ -167,7 +173,6 @@ def train(epochs=1):
         # set when using c10d's default "env"
         # initialization mode.
         # Initialize distributed process group
-        dist.init_process_group(backend="nccl")  # Assuming using NCCL backend
         rank = dist.get_rank()
         device_id = rank % torch.cuda.device_count()
         print(f"Start running basic DDP example on rank {rank}.")
