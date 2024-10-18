@@ -18,11 +18,6 @@ from torch.utils.data import Dataset, DataLoader, IterableDataset
 from llfs_infrence import generate_text, count_parameters
 from llfs_model import LlamaModel_simple, LlamaModel2
 
-
-
-os.environ["MASTER_ADDR"] = "localhost"
-os.environ["MASTER_PORT"] = "29400"
-
 pkgs = ["matplotlib",
         "torch",
         "tiktoken"
@@ -47,7 +42,9 @@ if not gpu_ok:
 
 def get_process_name():
     """Gets the name of the current process."""
-    return os.path.basename(os.path.realpath(__file__))
+    s = os.path.basename(os.path.realpath(__file__)) 
+    print(s)
+    return s
 
 
 class GPTDatasetV2(IterableDataset):
