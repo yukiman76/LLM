@@ -4,11 +4,15 @@ import os
 import glob
 import torch
 import tiktoken
+import warnings
 from torch import nn
 from tqdm import tqdm
 from torch.optim import Adam
+import torch.distributed as dist
 from importlib.metadata import version
+from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.utils.data import Dataset, DataLoader, IterableDataset
+
 # our tools
 from llfs_infrence import generate_text, count_parameters
 from llfs_model import LlamaModel_simple, LlamaModel2
@@ -21,6 +25,18 @@ for p in pkgs:
     print(f"{p} version: {version(p)}")
 
 torch.manual_seed(129)
+
+gpu_ok = False
+if torch.cuda.is_available():
+    device_cap = torch.cuda.get_device_capability()
+    if device_cap in ((7, 0), (8, 0), (9, 0)):
+        gpu_ok = True
+
+if not gpu_ok:
+    warnings.warn(
+        "GPU is not NVIDIA V100, A100, or H100. Speedup numbers may be lower "
+        "than expected."
+    )
 
 
 class GPTDatasetV2(IterableDataset):
@@ -130,9 +146,17 @@ def train(epochs=1):
     # If there are multiple GPUs, wrap the model with nn.DataParallel
     if torch.cuda.device_count() > 1:
         print("Let's use", torch.cuda.device_count(), "GPUs!")
-        model = nn.DataParallel(model)
+        # Initialize distributed process group
+        dist.init_process_group(backend="nccl")  # Assuming using NCCL backend
+        rank = dist.get_rank()
+        # Wrap your model with DDP
+        model = DDP(model.to(rank), device_ids=[rank])
+        # model = nn.DataParallel(model)
+    else:
+        model = model.to(device)
 
-    model = model.to(device)
+    # Compile the model
+    model = torch.compile(model)
 
     criterion = nn.CrossEntropyLoss()
     optimizer = Adam(model.parameters(), lr=0.001)
