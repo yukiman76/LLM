@@ -142,7 +142,7 @@ if __name__ == "__main__":
     assert n_gpus >= 2, f"Requires at least 2 GPUs to run, but got {n_gpus}"
     world_size = n_gpus//2
 
-    run_ddp(train, epochs, world_size)
+    run_ddp(run_ddp, epochs, world_size)
 
     import IPython
     IPython.embed()
