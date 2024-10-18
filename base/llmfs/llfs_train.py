@@ -42,7 +42,7 @@ if not gpu_ok:
 
 def get_process_name():
     """Gets the name of the current process."""
-    s = os.path.basename(os.path.realpath(__file__)) 
+    s = os.path.basename(os.path.realpath(__name__)) 
     print(s)
     return s
 
