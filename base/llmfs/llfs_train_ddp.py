@@ -49,9 +49,6 @@ if torch.cuda.is_available():
             "than expected."
         )
 
- 
-device: str = 'cuda' if torch.cuda.is_available() else ('mps' if torch.backends.mps.is_available() else 'cpu')
-print(f"setting device to {device}\n")
 
 # Function to compute accuracy
 def compute_accuracy(preds, labels):
@@ -64,6 +61,8 @@ def compute_accuracy(preds, labels):
 
 def train_ddp(rank=0, epochs=1, world_size=0):
     setup(rank, world_size)
+    device: str = 'cuda' if torch.cuda.is_available() else ('mps' if torch.backends.mps.is_available() else 'cpu')
+    print(f"setting device to {device}\n")
     tokenizer = tiktoken.get_encoding("cl100k_base")
     vocab_size = tokenizer.n_vocab # Use tokenizer's vocab size
     config = get_config()
