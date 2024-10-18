@@ -92,6 +92,7 @@ def train_ddp(rank=0, epochs=1, world_size=0):
                 device_ids=[local_rank],
                 output_device=local_rank)
 
+    model.to(device)
     criterion = nn.CrossEntropyLoss()
     optimizer = Adam(model.parameters(), lr=0.001)
 
@@ -153,15 +154,11 @@ if __name__ == "__main__":
     IPython.embed()
     tokenizer = tiktoken.get_encoding("cl100k_base")
     vocab_size = tokenizer.n_vocab # Use tokenizer's vocab size
-
-    model = LlamaModel2(vocab_size, embed_dim, hidden_dim, num_layers, num_heads, dropout)
-    model.load_state_dict(torch.load('llmfs_weights.pth', weights_only=True))
-    model = model.to(device)
  
-    result = generate_text(model, tokenizer, seed_text="in the beginning ", max_length=100)
-    print(result)
+    # result = generate_text(model, tokenizer, seed_text="in the beginning ", max_length=100)
+    # print(result)
 
-    print(f'The model has {count_parameters(model):,} trainable parameters')
+    # print(f'The model has {count_parameters(model):,} trainable parameters')
 
     import IPython
     IPython.embed()
