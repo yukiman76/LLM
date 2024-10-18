@@ -133,8 +133,9 @@ def train(epochs=1):
         print("Let's use", torch.cuda.device_count(), "GPUs!")
         model = nn.DataParallel(model)
 
-    model = model.to(device)
     model = torch.compile(model)
+    model = model.to(device)
+    
     criterion = nn.CrossEntropyLoss()
     optimizer = Adam(model.parameters(), lr=0.001)
 
