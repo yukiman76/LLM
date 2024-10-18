@@ -38,7 +38,7 @@ def setup(rank, world_size):
     os.environ['MASTER_ADDR'] = 'localhost'
     os.environ['MASTER_PORT'] = '12355'
     
-    dist.init_process_group(backend="gloo|nccl", rank=rank, world_size=world_size)
+    dist.init_process_group(backend="nccl", rank=rank, world_size=world_size)
 
 
 if torch.cuda.is_available():
