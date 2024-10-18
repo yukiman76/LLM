@@ -10,6 +10,7 @@ from tqdm import tqdm
 from torch.optim import Adam
 import torch.distributed as dist
 from importlib.metadata import version
+from torch.utils.data.distributed import DistributedSampler
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.utils.data import Dataset, DataLoader, IterableDataset
 
@@ -69,10 +70,12 @@ def create_dataloader_v2(sdir, tokenizer, batch_size=4, max_length=256,
     # Create dataset
     dataset = GPTDatasetV2(sdir, tokenizer, max_length, stride)
 
+    sampler = DistributedSampler(dataset)
+    
     # Create dataloader
     dataloader = DataLoader(
         dataset, batch_size=batch_size, shuffle=shuffle,
-        drop_last=drop_last, num_workers=num_workers)
+        drop_last=drop_last, num_workers=num_workers, sampler=sampler)
 
     return dataloader
 
