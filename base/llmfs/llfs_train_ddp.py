@@ -12,6 +12,7 @@ import torch.distributed as dist
 import torch.multiprocessing as mp
 from importlib.metadata import version
 from torch.nn.parallel import DistributedDataParallel as DDP
+from torch.distributed.elastic.multiprocessing.errors import record
 # our tools
 from llfs_data import create_dataloader
 from llfs_infrence import generate_text, count_parameters
@@ -36,7 +37,8 @@ def cleanup():
 def setup(rank, world_size):
     os.environ['MASTER_ADDR'] = 'localhost'
     os.environ['MASTER_PORT'] = '12355'
-    dist.init_process_group("nccl", rank=rank, world_size=world_size)
+    
+    dist.init_process_group(backend="gloo|nccl", rank=rank, world_size=world_size)
 
 
 if torch.cuda.is_available():
@@ -85,7 +87,10 @@ def train_ddp(rank=0, epochs=1, world_size=0):
     # If there are multiple GPUs, wrap the model with nn.DataParallel
 
     print("Let's use", torch.cuda.device_count(), "GPUs!")
-    model = DDP(model)
+    local_rank = int(os.environ["LOCAL_RANK"])
+    model = DDP(model,
+                device_ids=[local_rank],
+                output_device=local_rank)
 
     criterion = nn.CrossEntropyLoss()
     optimizer = Adam(model.parameters(), lr=0.001)
@@ -126,7 +131,7 @@ def train_ddp(rank=0, epochs=1, world_size=0):
 
     # return model, tokenizer
 
-
+@record
 def run_ddp(demo_fn, epochs, world_size):
     mp.spawn(train_ddp,
              args=(epochs, world_size),

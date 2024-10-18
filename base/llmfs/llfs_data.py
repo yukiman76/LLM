@@ -30,6 +30,8 @@ class GPTDatasetV2(IterableDataset):
     def size(self):
         return self.i_len
 
+    def __len__(self):
+        return  self.i_len
 
 def create_dataloader(sdir, tokenizer, batch_size=4, max_length=256,stride=128, 
                          shuffle=False, drop_last=True, num_workers=0, world_size=2,  
