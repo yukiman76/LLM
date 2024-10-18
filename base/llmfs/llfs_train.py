@@ -4,16 +4,11 @@ import os
 import glob
 import torch
 import tiktoken
-import warnings
 from torch import nn
 from tqdm import tqdm
 from torch.optim import Adam
-import torch.distributed as dist
 from importlib.metadata import version
-from torch.utils.data.distributed import DistributedSampler
-from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.utils.data import Dataset, DataLoader, IterableDataset
-
 # our tools
 from llfs_infrence import generate_text, count_parameters
 from llfs_model import LlamaModel_simple, LlamaModel2
@@ -26,28 +21,6 @@ for p in pkgs:
     print(f"{p} version: {version(p)}")
 
 torch.manual_seed(129)
-
-if torch.cuda.device_count() > 1:
-    dist.init_process_group(backend="nccl")  # Assuming using NCCL backend
-
-gpu_ok = False
-if torch.cuda.is_available():
-    device_cap = torch.cuda.get_device_capability()
-    if device_cap in ((7, 0), (8, 0), (9, 0)):
-        gpu_ok = True
-
-if not gpu_ok:
-    warnings.warn(
-        "GPU is not NVIDIA V100, A100, or H100. Speedup numbers may be lower "
-        "than expected."
-    )
-
-
-def get_process_name():
-    """Gets the name of the current process."""
-    s = os.path.basename(os.path.realpath(__name__)) 
-    print(f"Name : {s}")
-    return s
 
 
 class GPTDatasetV2(IterableDataset):
@@ -80,15 +53,10 @@ def create_dataloader_v2(sdir, tokenizer, batch_size=4, max_length=256,
     # Create dataset
     dataset = GPTDatasetV2(sdir, tokenizer, max_length, stride)
 
-    if torch.cuda.device_count() > 1:
-        sampler = DistributedSampler(dataset)
-    else:
-        sampler = None
-    
     # Create dataloader
     dataloader = DataLoader(
         dataset, batch_size=batch_size, shuffle=shuffle,
-        drop_last=drop_last, num_workers=num_workers, sampler=sampler)
+        drop_last=drop_last, num_workers=num_workers)
 
     return dataloader
 
@@ -157,33 +125,14 @@ def train(epochs=1):
                                        max_length=max_seq_length, stride=max_seq_length)
 
     model = LlamaModel2(vocab_size, embed_dim, hidden_dim, num_layers, num_heads, dropout)
-    use_DDP = False
+
 
     # If there are multiple GPUs, wrap the model with nn.DataParallel
     if torch.cuda.device_count() > 1:
-        if get_process_name() != 'torchrun':
-            print('Using DataParallel')
-            print("you need to run using torchrun")
-            print("torchrun --nnodes=1 --nproc_per_node=8 --rdzv_id=100 --rdzv_backend=c10d --rdzv_endpoint=$MASTER_ADDR:29400 llfs_train.py")
-        use_DDP = True
         print("Let's use", torch.cuda.device_count(), "GPUs!")
-        # we are assuming online one GPU Server in this DDP
-        world_size = torch.cuda.device_count()
-        # Environment variables which need to be
-        # set when using c10d's default "env"
-        # initialization mode.
-        # Initialize distributed process group
-        rank = dist.get_rank()
-        device_id = rank % torch.cuda.device_count()
-        print(f"Start running basic DDP example on rank {rank}.")
-        # Wrap your model with DDP
-        model = DDP(model.to(device_id), device_ids=[device_id])
-        # model = nn.DataParallel(model)
-    else:
-        model = model.to(device)
+        model = nn.DataParallel(model)
 
-    # Compile the model
-    model = torch.compile(model)
+    model = model.to(device)
 
     criterion = nn.CrossEntropyLoss()
     optimizer = Adam(model.parameters(), lr=0.001)
@@ -226,8 +175,6 @@ def train(epochs=1):
                 batch_idx += 1
                 tepoch.set_postfix(loss=loss.item(), accuracy=100. * accuracy)
 
-    if use_DDP:
-        dist.destroy_process_group()
 
     torch.save(model.state_dict(), './llmfs_weights.pth')
     return model, tokenizer
