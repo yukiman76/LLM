@@ -134,7 +134,7 @@ def train(epochs=1):
         model = nn.DataParallel(model)
 
     model = model.to(device)
-
+    model = torch.compile(model)
     criterion = nn.CrossEntropyLoss()
     optimizer = Adam(model.parameters(), lr=0.001)
 
