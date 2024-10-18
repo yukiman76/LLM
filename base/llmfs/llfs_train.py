@@ -96,7 +96,7 @@ def train(epochs=1):
             num_heads = 32 # Number of attention heads in transformer
             hidden_dim = 2048  # Size of feedforward layer
             num_layers = 32 # Number of transformer layers
-            max_seq_length = 512 # vMEM poor -  2048  # Maximum sequence length (context_length)
+            max_seq_length = 1024 # vMEM poor -  2048  # Maximum sequence length (context_length)
             dropout=0.1
 
         if "4090" in torch.cuda.get_device_name(0):
