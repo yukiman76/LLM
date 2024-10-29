@@ -1,12 +1,12 @@
-export MASTER_ADDR='localhost'
-export MASTER_PORT='12355'
-export OMP_NUM_THREADS='1'
+export MASTER_ADDR='192.168.2.32'
+export MASTER_PORT=12355
+# export OMP_NUM_THREADS='1'
 # torchrun --nnodes=1 --nproc_per_node=1 --rdzv_id=100 \
 #          --rdzv_backend=c10d --rdzv_endpoint=$MASTER_ADDR:$MASTER_PORT \
 #          llfs_train_ddp.py
 
-torchrun --nnodes=1 --nproc_per_node=2 --rdzv_id=100  \
-         --rdzv_backend=c10d --rdzv_endpoint=$MASTER_ADDR:$MASTER_PORT \
+torchrun --nnodes=1 --nproc_per_node=1 --rdzv_id=100  \
+         --rdzv_backend=c10d --rdzv_endpoint=$MASTER_ADDR --master_port=$MASTER_PORT \
          llfs_train_ddp.py 
 
 # torchrun --standalone 
