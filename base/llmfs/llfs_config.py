@@ -28,7 +28,7 @@ def get_config():
         config['num_layers'] = 32  # Number of transformer layers
 
     if "H100" in torch.cuda.get_device_name(0):
-        print("Using Nvidia 8x H100 GPU config")
+        print("Using Nvidia H100 GPU config")
         config['batch_size'] = 10
         config['embed_dim'] = 256  # Size of token embeddings
         config['num_heads'] = 32  # Number of attention heads in transformer

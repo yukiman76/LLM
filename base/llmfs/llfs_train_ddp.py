@@ -106,7 +106,7 @@ def train_ddp(rank=0, world_size=1, epochs=1):
     for epoch in range(epochs):
         # total_batches = data_loader.dataset.size()
         with tqdm(data_loader, unit="batch") as tepoch:
-            for data, target in data_loader:
+            for data, target in tepoch:
                 tepoch.set_description(f"Epoch {epoch}")
                 tepoch.sampler.set_epoch(epoch) 
                 data, target = data.to(rank), target.to(rank)
