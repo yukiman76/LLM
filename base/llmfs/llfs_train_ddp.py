@@ -105,28 +105,29 @@ def train_ddp(rank=0, world_size=1, epochs=1):
     # Train the model
     for epoch in range(epochs):
         # total_batches = data_loader.dataset.size()
-        with tqdm(data_loader, unit="batch") as tepoch:
-            for data, target in tepoch:
-                tepoch.set_description(f"Epoch {epoch}")
-                # tepoch.sampler.set_epoch(epoch) 
-                data, target = data.to(rank), target.to(rank)
-                optimizer.zero_grad()
-                output = model(data)
+        # with tqdm(data_loader, unit="batch") as tepoch:
+        for data, target in data_loader:
+            # tepoch.set_description(f"Epoch {epoch}")
+            # tepoch.sampler.set_epoch(epoch) 
+            data, target = data.to(rank), target.to(rank)
+            optimizer.zero_grad()
+            output = model(data)
 
-                output = output.view(-1, vocab_size)
-                target = target.view(-1)
-                loss = criterion(output, target)
+            output = output.view(-1, vocab_size)
+            target = target.view(-1)
+            loss = criterion(output, target)
 
-                loss.backward()
-                optimizer.step()
-                
-                accuracy = compute_accuracy(output, target)
+            loss.backward()
+            optimizer.step()
+            
+            accuracy = compute_accuracy(output, target)
 
-                if float(loss.item()) < 0.06:
-                    break
-                print(f"Epoch {epoch} - Loss {loss} - accuracy {accuracy}")
-                batch_idx += 1
-                tepoch.set_postfix(loss=loss.item(), accuracy=100. * accuracy)
+            if float(loss.item()) < 0.06:
+                break
+
+            print(f"Epoch {epoch} - Loss {loss} - accuracy {accuracy}")
+            batch_idx += 1
+            # tepoch.set_postfix(loss=loss.item(), accuracy=100. * accuracy)
 
 
     torch.save(model.state_dict(), './llmfs_weights.pth')
