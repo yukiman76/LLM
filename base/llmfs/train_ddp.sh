@@ -5,7 +5,7 @@ export OMP_NUM_THREADS='1'
 #          --rdzv_backend=c10d --rdzv_endpoint=$MASTER_ADDR:$MASTER_PORT \
 #          llfs_train_ddp.py
 
-torchrun --nnodes=1 --nproc_per_node=1 --rdzv_id=100  \
+torchrun --nnodes=1 --nproc_per_node=2 --rdzv_id=100  \
          --rdzv_backend=c10d --rdzv_endpoint=$MASTER_ADDR:$MASTER_PORT \
          llfs_train_ddp.py 
 
