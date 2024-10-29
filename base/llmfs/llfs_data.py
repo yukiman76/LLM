@@ -4,9 +4,9 @@ import tiktoken
 from tqdm import tqdm
 # from torch.utils.data.distributed import DistributedSampler
 from torch.utils.data import DataLoader, IterableDataset
+from torch.utils.data.distributed import DistributedSampler
 
-
-
+# distributedSampler
 
 class GPTDatasetV2(IterableDataset):
     def __init__(self, directory, tokenizer, max_length, stride):
@@ -34,7 +34,7 @@ class GPTDatasetV2(IterableDataset):
     def __len__(self):
         return  self.i_len
 
-def create_dataloader(sdir, tokenizer, batch_size=4, max_length=256,stride=128, 
+def create_dataloader(sdir, tokenizer, batch_size=4, max_length=256, stride=128, 
                          shuffle=False, drop_last=True, num_workers=0, world_size=2,  
                          rank=1):
 
@@ -42,9 +42,9 @@ def create_dataloader(sdir, tokenizer, batch_size=4, max_length=256,stride=128,
     dataset = GPTDatasetV2(sdir, tokenizer, max_length, stride)
     sampler = None
     
-    # if torch.cuda.device_count() > 1:
-    #     sampler = DistributedSampler(dataset, num_replicas=world_size, rank=rank, shuffle=False, 
-    #                                  drop_last=False)
+    if torch.cuda.device_count() > 1:
+        sampler = DistributedSampler(dataset, num_replicas=world_size, rank=rank, shuffle=False, 
+                                     drop_last=False)
        
     
     # Create dataloader
