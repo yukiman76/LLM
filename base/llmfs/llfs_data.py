@@ -1,8 +1,9 @@
 import glob
 import torch
+import tiktoken
 from tqdm import tqdm
-from torch.utils.data.distributed import DistributedSampler
-from torch.utils.data import Dataset, DataLoader, IterableDataset
+# from torch.utils.data.distributed import DistributedSampler
+from torch.utils.data import DataLoader, IterableDataset
 
 
 
@@ -52,3 +53,19 @@ def create_dataloader(sdir, tokenizer, batch_size=4, max_length=256,stride=128,
 
 
     return dataloader
+
+
+if __name__ == "__main__":
+    directory_path = 'data'
+    tokenizer = tiktoken.get_encoding("cl100k_base")
+    vocab_size = tokenizer.n_vocab # Use tokenizer's vocab size
+    batch_size = 8
+    embed_dim = 256  # Size of token embeddings
+    num_heads = 8  # Number of attention heads in transformer
+    hidden_dim = 2048  # Size of feedforward layer
+    num_layers = 12  # Number of transformer layers
+    max_seq_length = 512  # Maximum sequence length (context_length)
+    dropout=0.1
+
+    data_loader = create_dataloader(directory_path, tokenizer, batch_size=batch_size,
+                                       max_length=max_seq_length, stride=max_seq_length) 

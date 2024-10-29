@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # coding: utf-8
-import os
 import glob
 import torch
 import tiktoken
@@ -8,10 +7,10 @@ from torch import nn
 from tqdm import tqdm
 from torch.optim import Adam
 from importlib.metadata import version
-from torch.utils.data import Dataset, DataLoader, IterableDataset
+from torch.utils.data import DataLoader, IterableDataset
 # our tools
 from llfs_infrence import generate_text, count_parameters
-from llfs_model import LlamaModel_simple, LlamaModel2
+from llfs_model import LlamaModel2
 
 pkgs = ["matplotlib",
         "torch",
@@ -109,6 +108,16 @@ def train(epochs=1):
             num_layers = 32  # Number of transformer layers
             max_seq_length = 512  # Maximum sequence length (context_length)
             dropout=0.1
+        if "H100" in torch.cuda.get_device_name(0):
+            print("Using Nvidia 8x H100 GPU config")
+            batch_size = 500
+            # -- ver 3, LLama3 nvidia 4 x 4090 24G
+            embed_dim = 256  # Size of token embeddings
+            num_heads = 32  # Number of attention heads in transformer
+            hidden_dim = 4096  # Size of feedforward layer
+            num_layers = 32  # Number of transformer layers
+            max_seq_length = 512  # Maximum sequence length (context_length)
+            dropout=0.1
 
     else:
         print("Using default")
@@ -143,7 +152,7 @@ def train(epochs=1):
     batch_idx = 0
     # Train the model
     for epoch in range(epochs):
-        total_batches = data_loader.dataset.size()
+        # total_batches = data_loader.dataset.size()
         with tqdm(data_loader, unit="batch") as tepoch:
             for data, target in tepoch:
                 tepoch.set_description(f"Epoch {epoch}")

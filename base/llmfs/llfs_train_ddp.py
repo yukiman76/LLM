@@ -43,7 +43,7 @@ def setup(rank, world_size):
 
 if torch.cuda.is_available():
     device_cap = torch.cuda.get_device_capability()
-    if device_cap in ((7, 0), (8, 0), (9, 0)):
+    if device_cap not in ((7, 0), (8, 0), (9, 0)):
         warnings.warn(
             "GPU is not NVIDIA V100, A100, or H100. Speedup numbers may be lower "
             "than expected."
