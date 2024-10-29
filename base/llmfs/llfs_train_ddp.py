@@ -120,12 +120,12 @@ def train_ddp(rank=0, world_size=1, epochs=1):
             loss.backward()
             optimizer.step()
             
-            accuracy = compute_accuracy(output, target)
+            # accuracy = compute_accuracy(output, target)
 
             if float(loss.item()) < 0.06:
                 break
 
-            print(f"Epoch {epoch} - Loss {loss} - accuracy {accuracy}")
+            # print(f"Epoch {epoch} - Loss {loss} - accuracy {accuracy}")
             batch_idx += 1
             # tepoch.set_postfix(loss=loss.item(), accuracy=100. * accuracy)
 
