@@ -108,7 +108,7 @@ def train_ddp(rank=0, world_size=1, epochs=1):
         with tqdm(data_loader, unit="batch") as tepoch:
             for data, target in tepoch:
                 tepoch.set_description(f"Epoch {epoch}")
-                tepoch.sampler.set_epoch(epoch) 
+                # tepoch.sampler.set_epoch(epoch) 
                 data, target = data.to(rank), target.to(rank)
                 optimizer.zero_grad()
                 output = model(data)
