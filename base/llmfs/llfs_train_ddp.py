@@ -84,8 +84,8 @@ def train_ddp(rank=0, epochs=1, world_size=0):
     # If there are multiple GPUs, wrap the model with nn.DataParallel
 
     print("Let's use", torch.cuda.device_count(), "GPUs!")
-    local_rank = int(os.environ["LOCAL_RANK"])
-    model.to(device)
+    # local_rank = int(os.environ["LOCAL_RANK"])
+    model.to("cuda")
     model = DDP(model)
 
 
