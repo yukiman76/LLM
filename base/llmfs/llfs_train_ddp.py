@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
 import os
-import glob
 import torch
 import tiktoken
 import warnings
@@ -15,8 +14,7 @@ from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.distributed.elastic.multiprocessing.errors import record
 # our tools
 from llfs_data import create_dataloader
-from llfs_infrence import generate_text, count_parameters
-from llfs_model import LlamaModel_simple, LlamaModel2
+from llfs_model import LlamaModel2
 from llfs_config import get_config
 
 
@@ -87,9 +85,10 @@ def train_ddp(rank=0, epochs=1, world_size=0):
 
     print("Let's use", torch.cuda.device_count(), "GPUs!")
     local_rank = int(os.environ["LOCAL_RANK"])
+    model.to(device)
     model = DDP(model)
 
-    model.to(device)
+
     criterion = nn.CrossEntropyLoss()
     optimizer = Adam(model.parameters(), lr=0.001)
 
