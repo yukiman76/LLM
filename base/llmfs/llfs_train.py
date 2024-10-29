@@ -138,9 +138,9 @@ def train(epochs=1):
 
 
     # If there are multiple GPUs, wrap the model with nn.DataParallel
-    # if torch.cuda.device_count() > 1:
-    #     print("Let's use", torch.cuda.device_count(), "GPUs!")
-    #     model = nn.DataParallel(model)
+    if torch.cuda.device_count() > 1:
+        print("Let's use", torch.cuda.device_count(), "GPUs!")
+        model = nn.DataParallel(model)
 
     # model = torch.compile(model)
     model = model.to(device)
