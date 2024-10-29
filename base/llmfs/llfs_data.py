@@ -48,7 +48,7 @@ def create_dataloader(sdir, tokenizer, batch_size=4, max_length=256,stride=128,
        
     
     # Create dataloader
-    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, pin_memory=False,
+    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, pin_memory=True,
                             drop_last=drop_last, num_workers=num_workers, sampler=sampler)
 
 
