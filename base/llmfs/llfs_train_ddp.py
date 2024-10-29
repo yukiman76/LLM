@@ -85,7 +85,7 @@ def train_ddp(rank=0, epochs=1, world_size=0):
 
     print("Let's use", torch.cuda.device_count(), "GPUs!")
     # local_rank = int(os.environ["LOCAL_RANK"])
-    model.to("cuda")
+    # model.to("cuda")
     model = DDP(model)
 
 
