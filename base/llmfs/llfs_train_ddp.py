@@ -57,7 +57,7 @@ def compute_accuracy(preds, labels):
     return accuracy.item()
 
 
-def train_ddp(rank=0, epochs=1, world_size=0):
+def train_ddp(rank=0, world_size=1, epochs=1):
     setup(rank, world_size)
     device: str = 'cuda' if torch.cuda.is_available() else ('mps' if torch.backends.mps.is_available() else 'cpu')
     print(f"setting device to {device}\n")
@@ -77,7 +77,7 @@ def train_ddp(rank=0, epochs=1, world_size=0):
 
     data_loader = create_dataloader(directory_path, tokenizer, batch_size=batch_size,
                                     max_length=max_seq_length, stride=max_seq_length,
-                                    num_workers=0, world_size=world_size, rank=rank)
+                                    num_workers=1, world_size=world_size, rank=rank)
 
     model = LlamaModel2(vocab_size, embed_dim, hidden_dim, num_layers, num_heads, dropout)
 
@@ -130,22 +130,22 @@ def train_ddp(rank=0, epochs=1, world_size=0):
     # return model, tokenizer
 
 @record
-def run_ddp(demo_fn, epochs, world_size):
-    mp.spawn(train_ddp,
-             args=(epochs, world_size),
+def run_ddp(demo_fn, world_size, epochs):
+    mp.spawn(demo_fn,
+             args=(world_size, epochs),
              nprocs=world_size,
              join=True)
 
   
 if __name__ == "__main__":
     #git clone --depth=1 --branch=main https://github.com/mlschmitt/classic-books-markdown data && rm -rf data/.git
+    epochs = 1
+
     n_gpus = torch.cuda.device_count()
-
-    epochs=1
     assert n_gpus >= 2, f"Requires at least 2 GPUs to run, but got {n_gpus}"
-    world_size = n_gpus//2
+    world_size = n_gpus
 
-    run_ddp(train_ddp, epochs, world_size)
+    run_ddp(train_ddp, world_size, epochs)
 
     import IPython
     IPython.embed()
