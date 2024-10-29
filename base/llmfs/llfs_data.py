@@ -14,11 +14,11 @@ class GPTDatasetV2(IterableDataset):
         self.tokenizer = tokenizer
         self.max_length = max_length
         self.stride = stride
-        self.i_len = len(glob.glob(f"{self.directory}/**/*.md", recursive=True))
+        self.docs = glob.glob(f"{self.directory}/**/*.md", recursive=True)
+        self.i_len = len(self.docs)
 
     def __iter__(self):
-        docs = glob.glob(f"{self.directory}/**/*.md", recursive=True)
-        with tqdm(docs, unit="document") as tqdocs:
+        with tqdm(self.docs, unit="document") as tqdocs:
             for filename in tqdocs:
                 with open(filename, 'r') as f:
                     txt = f.read()
