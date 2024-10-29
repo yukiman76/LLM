@@ -34,7 +34,7 @@ def cleanup():
 
 def setup(rank, world_size):
     os.environ['MASTER_ADDR'] = 'localhost'
-    os.environ['MASTER_PORT'] = '12356'
+    os.environ['MASTER_PORT'] = '12355'
     
     dist.init_process_group(backend="nccl", rank=rank, world_size=world_size)
 
@@ -59,8 +59,9 @@ def compute_accuracy(preds, labels):
 
 def train_ddp(rank=0, world_size=1, epochs=1):
     setup(rank, world_size)
-    device: str = 'cuda' if torch.cuda.is_available() else ('mps' if torch.backends.mps.is_available() else 'cpu')
-    print(f"setting device to {device}\n")
+    print(f"Running DDP with model parallel example on rank {rank}.")
+    # device: str = 'cuda' if torch.cuda.is_available() else ('mps' if torch.backends.mps.is_available() else 'cpu')
+    # print(f"setting device to {device}\n")
     tokenizer = tiktoken.get_encoding("cl100k_base")
     vocab_size = tokenizer.n_vocab # Use tokenizer's vocab size
     config = get_config()
@@ -83,7 +84,7 @@ def train_ddp(rank=0, world_size=1, epochs=1):
 
     # If there are multiple GPUs, wrap the model with nn.DataParallel
 
-    print("Let's use", torch.cuda.device_count(), "GPUs!")
+    # print("Let's use", torch.cuda.device_count(), "GPUs!")
     # local_rank = int(os.environ["LOCAL_RANK"])
     # model.to("cuda")
     model = DDP(model)
@@ -102,8 +103,8 @@ def train_ddp(rank=0, world_size=1, epochs=1):
             for data, target in tepoch:
                 tepoch.set_description(f"Epoch {epoch}")
                 tepoch.sampler.set_epoch(epoch) 
-                print(f"Sending to device {device}") 
-                data, target = data.to(device), target.to(device)
+                # print(f"Sending to device {device}") 
+                # data, target = data.to(device), target.to(device)
                 optimizer.zero_grad()
                 output = model(data)
 
