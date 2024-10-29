@@ -2,6 +2,10 @@
 # coding: utf-8
 from torch import nn
 
+
+# TODO: add layer normalization before and after the attention layers.
+# TODO: add positional encoding to give the model a sense of token positions
+# TODO: add residual connections arround the transformers blocks to make the gradient
 class LlamaModel2(nn.Module):
     def __init__(self, vocab_size, embed_dim, hidden_dim, num_layers, num_heads, dropout):
         super().__init__()
