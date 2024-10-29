@@ -110,7 +110,7 @@ def train(epochs=1):
             dropout=0.1
         if "H100" in torch.cuda.get_device_name(0):
             print("Using Nvidia 8x H100 GPU config")
-            batch_size = 50
+            batch_size = 10
             # -- ver 3, LLama3 nvidia 4 x 4090 24G
             embed_dim = 256  # Size of token embeddings
             num_heads = 32  # Number of attention heads in transformer
