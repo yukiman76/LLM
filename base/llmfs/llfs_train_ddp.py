@@ -39,13 +39,13 @@ def setup(rank, world_size):
     dist.init_process_group(backend="nccl", rank=rank, world_size=world_size)
 
 
-if torch.cuda.is_available():
-    device_cap = torch.cuda.get_device_capability()
-    if device_cap not in ((7, 0), (8, 0), (9, 0)):
-        warnings.warn(
-            "GPU is not NVIDIA V100, A100, or H100. Speedup numbers may be lower "
-            "than expected."
-        )
+# if torch.cuda.is_available():
+#     device_cap = torch.cuda.get_device_capability()
+#     if device_cap not in ((7, 0), (8, 0), (9, 0)):
+#         warnings.warn(
+#             "GPU is not NVIDIA V100, A100, or H100. Speedup numbers may be lower "
+#             "than expected."
+#         )
 
 
 # Function to compute accuracy
@@ -119,7 +119,7 @@ def train_ddp(rank=0, world_size=1, epochs=1):
 
             if float(loss.item()) < 0.06:
                 break
-
+            print(f"Epoch {epoch} - Loss {loss} - accuracy {accuracy}")
             batch_idx += 1
             # tepoch.set_postfix(loss=loss.item(), accuracy=100. * accuracy)
 
