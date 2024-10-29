@@ -1,13 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
-import os
-import glob
-import torch
-import tiktoken
 from torch import nn
-from torch.optim import Adam
-from importlib.metadata import version
-from torch.utils.data import Dataset, DataLoader, IterableDataset
 
 class LlamaModel2(nn.Module):
     def __init__(self, vocab_size, embed_dim, hidden_dim, num_layers, num_heads, dropout):

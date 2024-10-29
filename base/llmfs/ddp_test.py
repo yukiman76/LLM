@@ -1,5 +1,4 @@
 import os
-import sys
 import tempfile
 import torch
 import torch.distributed as dist

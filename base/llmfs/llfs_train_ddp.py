@@ -3,9 +3,7 @@
 import os
 import torch
 import tiktoken
-import warnings
 from torch import nn
-from tqdm import tqdm
 from torch.optim import Adam
 import torch.distributed as dist
 import torch.multiprocessing as mp

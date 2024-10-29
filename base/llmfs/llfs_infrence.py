@@ -1,13 +1,11 @@
 #!/usr/bin/env python
 # coding: utf-8
-import os
-import glob
 import torch
 import tiktoken
 from torch import nn
 from importlib.metadata import version
 # Our tools
-from llfs_model import LlamaModel_simple, LlamaModel2
+from llfs_model import LlamaModel2
 from llfs_config import get_config
 
 
