@@ -97,11 +97,12 @@ def train_ddp(rank=0, epochs=1, world_size=0):
 
     # Train the model
     for epoch in range(epochs):
-        total_batches = data_loader.dataset.size()
+        # total_batches = data_loader.dataset.size()
         with tqdm(data_loader, unit="batch") as tepoch:
             for data, target in tepoch:
                 tepoch.set_description(f"Epoch {epoch}")
-                tepoch.sampler.set_epoch(epoch)  
+                tepoch.sampler.set_epoch(epoch) 
+                print(f"Sending to device {device}") 
                 data, target = data.to(device), target.to(device)
                 optimizer.zero_grad()
                 output = model(data)
