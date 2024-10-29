@@ -26,17 +26,3 @@ class LlamaModel2(nn.Module):
         output = self.transformer(embedded, embedded)
         output = self.fc(output)
         return output
-
-
-class LlamaModel_simple(nn.Module):
-    def __init__(self, vocab_size, embed_size, hidden_size, num_layers, num_heads, dropout):
-        super().__init__()
-        self.embedding = nn.Embedding(vocab_size, embed_size)
-        self.rnn = nn.GRU(embed_size, hidden_size, num_layers)
-        self.fc = nn.Linear(hidden_size, vocab_size)
-
-    def forward(self, x):
-        embedded = self.embedding(x)
-        output, _ = self.rnn(embedded)
-        output = self.fc(output)
-        return output
