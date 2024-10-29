@@ -27,4 +27,14 @@ def get_config():
         config['hidden_dim'] = 4096  # Size of feedforward layer
         config['num_layers'] = 32  # Number of transformer layers
 
+    if "H100" in torch.cuda.get_device_name(0):
+        print("Using Nvidia 8x H100 GPU config")
+        config['batch_size'] = 75
+        config['embed_dim'] = 256  # Size of token embeddings
+        config['num_heads'] = 32  # Number of attention heads in transformer
+        config['hidden_dim'] = 4096  # Size of feedforward layer
+        config['num_layers'] = 32  # Number of transformer layers
+        config['max_seq_length'] = 512  # Maximum sequence length (context_length)
+        config['dropout'] = 0.1
+
     return config
