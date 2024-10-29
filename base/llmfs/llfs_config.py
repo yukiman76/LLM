@@ -17,7 +17,7 @@ def get_config():
         config['num_heads'] = 32 # Number of attention heads in transformer
         config['hidden_dim'] = 4096  # Size of feedforward layer
         config['num_layers'] = 32 # Number of transformer layers
-        config['max_seq_length'] = 2048 # Maximum sequence length (context_length)
+        config['max_seq_length'] = 512 # Maximum sequence length (context_length)
 
     if "4090" in sdevice_name:
         print("Using Nvidia 4090 GPU config")
