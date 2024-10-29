@@ -110,7 +110,7 @@ def train_ddp(rank=0, world_size=1, epochs=1):
             # tepoch.set_description(f"Epoch {epoch}")
             # tepoch.sampler.set_epoch(epoch) 
             # print(f"Sending to device {device}") 
-            # data, target = data.to(device), target.to(device)
+            data, target = data.to(rank), target.to(rank)
             optimizer.zero_grad()
             output = model(data)
 
