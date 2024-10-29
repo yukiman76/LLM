@@ -33,8 +33,8 @@ def cleanup():
 
 
 def setup(rank, world_size):
-    # os.environ['MASTER_ADDR'] = 'localhost'
-    # os.environ['MASTER_PORT'] = '12355'
+    os.environ['MASTER_ADDR'] = 'localhost'
+    os.environ['MASTER_PORT'] = '12356'
     
     dist.init_process_group(backend="nccl", rank=rank, world_size=world_size)
 
@@ -86,9 +86,15 @@ def train_ddp(rank=0, world_size=1, epochs=1):
 
     # print("Let's use", torch.cuda.device_count(), "GPUs!")
     # local_rank = int(os.environ["LOCAL_RANK"])
-    # model.to("cuda")
-    model = DDP(model)
+    model.to(rank)
+    model = DDP(model, device_ids=[rank])
 
+    # CHECKPOINT_PATH = tempfile.gettempdir() + "/model.checkpoint"
+    # if rank == 0:
+    #     # All processes should see same parameters as they all start from same
+    #     # random parameters and gradients are synchronized in backward passes.
+    #     # Therefore, saving it in one process is sufficient.
+    #     torch.save(ddp_model.state_dict(), CHECKPOINT_PATH)
 
     criterion = nn.CrossEntropyLoss()
     optimizer = Adam(model.parameters(), lr=0.001)
