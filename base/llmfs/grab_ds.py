@@ -22,6 +22,6 @@ for dsn in ds_Names:
     try:
         print_dataset_size_if_provided(dsn)
         ds = load_dataset(dsn, cache_dir=LOCAL_DISK_CACHE_DIR))
-        ds.save_to_disk(dsn.replace("/", "_"))
+        # ds.save_to_disk(dsn.replace("/", "_"))
     except Exception as e:
       print(f'Exception {e} while processing {dsn}')
