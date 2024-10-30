@@ -1,9 +1,8 @@
 import os
 LOCAL_DISK_MOUNT = '/mnt/data'
-LOCAL_DISK_CACHE_DIR = f'{LOCAL_DISK_MOUNT}/hf_cache/'
 
-os.environ['HF_HOME'] = LOCAL_DISK_CACHE_DIR
-os.environ['HF_DATASETS_CACHE'] = LOCAL_DISK_CACHE_DIR
+os.environ['HF_HOME'] = f'{LOCAL_DISK_MOUNT}/hf_cache/'
+os.environ['HF_DATASETS_CACHE'] = f'{LOCAL_DISK_MOUNT}/datasets/'
 
 from datasets import load_dataset
 from datasets import load_dataset_builder
@@ -11,7 +10,7 @@ from psutil._common import bytes2human
 
 
 
-print(f"using {LOCAL_DISK_CACHE_DIR}")
+print(f"using {LOCAL_DISK_MOUNT}")
 
 def print_dataset_size_if_provided(*args, **kwargs):
   dataset_builder = load_dataset_builder(*args, **kwargs)
