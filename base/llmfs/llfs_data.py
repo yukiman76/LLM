@@ -6,13 +6,10 @@ from tqdm import tqdm
 # from torch.utils.data.distributed import DistributedSampler
 from torch.utils.data import DataLoader, IterableDataset
 # from torch.utils.data.distributed import DistributedSampler
-from datasets import concatenate_datasets, load_dataset
-
-
 LOCAL_DISK_MOUNT = '/mnt/data'
-LOCAL_DISK_CACHE_DIR = f'{LOCAL_DISK_MOUNT}/hf_cache/'
-
-os.environ['HF_HOME'] = LOCAL_DISK_CACHE_DIR
+os.environ['HF_HOME'] = f'{LOCAL_DISK_MOUNT}/hf_cache/'
+os.environ['HF_DATASETS_CACHE'] = f'{LOCAL_DISK_MOUNT}/datasets/'
+from datasets import concatenate_datasets, load_dataset
 
 # distributedSampler
 
