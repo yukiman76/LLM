@@ -10,6 +10,7 @@ LOCAL_DISK_CACHE_DIR = f'{LOCAL_DISK_MOUNT}/hf_cache/'
 os.environ['HF_HOME'] = LOCAL_DISK_CACHE_DIR
 os.environ['HF_DATASETS_CACHE'] = LOCAL_DISK_CACHE_DIR
 
+print(f"using {LOCAL_DISK_CACHE_DIR}")
 
 def print_dataset_size_if_provided(*args, **kwargs):
   dataset_builder = load_dataset_builder(*args, **kwargs)
