@@ -20,7 +20,7 @@ device: str = 'cuda' if torch.cuda.is_available() else ('mps' if torch.backends.
 torch.manual_seed(129)
 
 
-def generate_text(model, tokenizer, seed_text, max_length=100):
+def generate_text(model, tokenizer, seed_text, max_length=100, device='cuda'):
     model.eval()  # Set the model to evaluation mode
     with torch.no_grad():  # No need to track the gradientsi
         input_ids = tokenizer.encode(seed_text)
