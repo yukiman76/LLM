@@ -1,10 +1,18 @@
+import os
 import glob
 import torch
 import tiktoken
 from tqdm import tqdm
 # from torch.utils.data.distributed import DistributedSampler
 from torch.utils.data import DataLoader, IterableDataset
-from torch.utils.data.distributed import DistributedSampler
+# from torch.utils.data.distributed import DistributedSampler
+from datasets import concatenate_datasets, load_dataset
+
+
+LOCAL_DISK_MOUNT = '/mnt/data'
+LOCAL_DISK_CACHE_DIR = f'{LOCAL_DISK_MOUNT}/hf_cache/'
+
+os.environ['HF_HOME'] = LOCAL_DISK_CACHE_DIR
 
 # distributedSampler
 
@@ -39,16 +47,20 @@ def create_dataloader(sdir, tokenizer, batch_size=4, max_length=256, stride=128,
                          rank=1):
 
     # Create dataset
-    dataset = GPTDatasetV2(sdir, tokenizer, max_length, stride)
+    books_ds = GPTDatasetV2(sdir, tokenizer, max_length, stride)
     sampler = None
     
     # if torch.cuda.device_count() > 1:
     #     sampler = DistributedSampler(dataset, num_replicas=world_size, rank=rank, shuffle=False, 
     #                                  drop_last=False)
-       
+
+    en = load_dataset("allenai/c4", "en")
+
+    # Concatenate both datasets
+    concatenated = concatenate_datasets([en, books_ds]) 
     
     # Create dataloader
-    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, pin_memory=True,
+    dataloader = DataLoader(concatenated, batch_size=batch_size, shuffle=shuffle, pin_memory=True,
                             drop_last=drop_last, num_workers=num_workers, sampler=sampler)
 
 
