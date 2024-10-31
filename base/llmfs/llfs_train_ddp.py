@@ -83,7 +83,7 @@ def train_ddp(rank=0, world_size=1, epochs=1):
 
     data_loader = create_dataloader(directory_path, tokenizer, batch_size=batch_size,
                                     max_length=max_seq_length, stride=max_seq_length,
-                                    num_workers=1, world_size=world_size, rank=rank)
+                                    num_workers=10, world_size=world_size, rank=rank)
 
     model = LlamaModel2(vocab_size, embed_dim, hidden_dim, num_layers, num_heads, dropout)
 
