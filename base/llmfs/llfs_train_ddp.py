@@ -5,7 +5,7 @@ LOCAL_DISK_MOUNT = '/mnt/data'
 if os.path.exists(LOCAL_DISK_MOUNT):
     os.environ['HF_HOME'] = f'{LOCAL_DISK_MOUNT}/hf_cache/'
     os.environ['HF_DATASETS_CACHE'] = f'{LOCAL_DISK_MOUNT}/datasets/'
-
+import mlflow
 import torch
 import tiktoken
 from torch import nn
@@ -65,81 +65,84 @@ def compute_accuracy(preds, labels):
 def train_ddp(rank=0, world_size=1, epochs=1):
     setup(rank, world_size)
     print(f"Running DDP with model parallel example on rank {rank}.")
-    # device: str = 'cuda' if torch.cuda.is_available() else ('mps' if torch.backends.mps.is_available() else 'cpu')
-    # print(f"setting device to {device}\n")
+    loss_fn = nn.CrossEntropyLoss()
     tokenizer = tiktoken.get_encoding("cl100k_base")
     vocab_size = tokenizer.n_vocab # Use tokenizer's vocab size
     config = get_config()
+
+    config['epochs'] = epochs
+    config["learning_rate"] = 1e-3
+    config["metric_function"] = "compute_accuracy"
+    config["optimizer"] = "Adam"
+    config["loss_function"] = loss_fn.__class__.__name__
+    config["tokenizer"] = "cl100k_base" 
+
     print(f"\nConfig:\n{config}")
-    batch_size = config['batch_size']
-    embed_dim = config['embed_dim']
-    num_heads = config['num_heads']
-    hidden_dim =config['hidden_dim']
-    num_layers = config['num_layers']
-    max_seq_length = config['max_seq_length']
-    dropout = config['dropout']
+    with mlflow.start_run():
+        # Log training parameters.
+        mlflow.log_params(config)
 
-    directory_path = 'data'
+        directory_path = 'data'
 
-    data_loader = create_dataloader(directory_path, tokenizer, batch_size=batch_size,
-                                    max_length=max_seq_length, stride=max_seq_length,
-                                    num_workers=10, world_size=world_size, rank=rank)
+        data_loader = create_dataloader(directory_path, tokenizer, batch_size=config['batch_size'],
+                                        max_length=config['max_seq_length'], stride=config['max_seq_length'],
+                                        num_workers=10, world_size=world_size, rank=rank)
 
-    model = LlamaModel2(vocab_size, embed_dim, hidden_dim, num_layers, num_heads, dropout)
-
-    # If there are multiple GPUs, wrap the model with nn.DataParallel
-
-    # print("Let's use", torch.cuda.device_count(), "GPUs!")
-    # local_rank = int(os.environ["LOCAL_RANK"])
-    model.to(rank)
-    model = DDP(model, device_ids=[rank])
-
-    # CHECKPOINT_PATH = tempfile.gettempdir() + "/model.checkpoint"
-    # if rank == 0:
-    #     # All processes should see same parameters as they all start from same
-    #     # random parameters and gradients are synchronized in backward passes.
-    #     # Therefore, saving it in one process is sufficient.
-    #     torch.save(ddp_model.state_dict(), CHECKPOINT_PATH)
-
-    criterion = nn.CrossEntropyLoss()
-    optimizer = Adam(model.parameters(), lr=0.001)
-
-    model.train()  # Set model to training mode
-    batch_idx = 0
-
-    # Train the model
-    for epoch in range(epochs):
-        # total_batches = data_loader.dataset.size()
-        # with tqdm(data_loader, unit="batch") as tepoch:
-        for data, target in data_loader:
-            # tepoch.set_description(f"Epoch {epoch}")
-            # tepoch.sampler.set_epoch(epoch) 
-            data, target = data.to(rank), target.to(rank)
-            optimizer.zero_grad()
-            output = model(data)
-
-            output = output.view(-1, vocab_size)
-            target = target.view(-1)
-            loss = criterion(output, target)
-
-            loss.backward()
-            optimizer.step()
-            
-            # accuracy = compute_accuracy(output, target)
-
-            if float(loss.item()) < 0.06:
-                break
-
-            # print(f"Epoch {epoch} - Loss {loss} - accuracy {accuracy}")
-            batch_idx += 1
-            # tepoch.set_postfix(loss=loss.item(), accuracy=100. * accuracy)
+        model = LlamaModel2(vocab_size, embed_dim=config['embed_dim'], 
+                            hidden_dim=config['hidden_dim'], num_layers=config['num_layers'], 
+                            num_heads=config['num_heads'], dropout=config['dropout'])
 
 
-    torch.save(model.state_dict(), './llmfs_weights.pth')
+        model.to(rank)
+        model = DDP(model, device_ids=[rank])
+
+        # CHECKPOINT_PATH = tempfile.gettempdir() + "/model.checkpoint"
+        # if rank == 0:
+        #     # All processes should see same parameters as they all start from same
+        #     # random parameters and gradients are synchronized in backward passes.
+        #     # Therefore, saving it in one process is sufficient.
+        #     torch.save(ddp_model.state_dict(), CHECKPOINT_PATH)
+
+
+        optimizer = Adam(model.parameters(), lr=config["learning_rate"])
+
+        model.train()  # Set model to training mode
+        batch_idx = 0
+
+        # Train the model
+        for epoch in range(epochs):
+            for batch, (data, target) in enumerate(data_loader):
+                data, target = data.to(rank), target.to(rank)
+                output = model(data)
+
+                output = output.view(-1, vocab_size)
+                target = target.view(-1)
+                loss = loss_fn(output, target)
+
+                loss.backward()
+                optimizer.step()
+                optimizer.zero_grad()                
+                accuracy = compute_accuracy(output, target)
+
+                if float(loss.item()) < 0.06:
+                    # early stop
+                    break
+
+                # if batch % 100 == 0:
+                loss, current = loss.item(), batch
+                mlflow.log_metric("loss", f"{loss:3f}", step=(batch // 100))
+                mlflow.log_metric("accuracy", f"{accuracy:3f}", step=(batch // 100))
+                print(
+                    f"Epoch {epoch} loss: {loss:3f} accuracy: {accuracy:3f} [{current} / {len(data_loader)}]"
+                )
+                batch_idx += 1
+
+
+        torch.save(model.state_dict(), './llmfs_weights.pth')
+        # Save the trained model to MLflow.
+        mlflow.pytorch.log_model(model, "model")
 
     cleanup()
-
-    # return model, tokenizer
 
 @record
 def run_ddp(demo_fn, world_size, epochs):
