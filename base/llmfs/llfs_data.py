@@ -56,7 +56,7 @@ def create_dataloader(sdir, tokenizer, batch_size=4, max_length=256, stride=128,
     en = load_dataset("allenai/c4", "en", split="train", streaming=True)
     en = en.take(1_000)
     # Concatenate both datasets
-    concatenated = concatenate_datasets([books_ds, en]) 
+    # concatenated = concatenate_datasets([books_ds, en]) 
     
     # Create dataloader
     dataloader = DataLoader(en, batch_size=batch_size, shuffle=shuffle, pin_memory=True,
