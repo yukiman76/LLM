@@ -21,21 +21,29 @@ def print_dataset_size_if_provided(*args, **kwargs):
 
 
 # togethercomputer/RedPajama-Data-1T is a clean-room, fully open-source implementation of the LLaMa dataset.
-dsn = "tiiuae/falcon-refinedweb"
-print_dataset_size_if_provided(dsn)
-ds = load_dataset(dsn)
-ds.save_to_disk(f'{LOCAL_DISK_MOUNT}/datasets/{dsn.replace("/","_")}')
+try:
+  dsn = "tiiuae/falcon-refinedweb"
+  print_dataset_size_if_provided(dsn)
+  ds = load_dataset(dsn)
+  ds.save_to_disk(f'{LOCAL_DISK_MOUNT}/datasets/{dsn.replace("/","_")}')
+except Exception as e:
+  print(e)
 
+try:
+  # allenai/c4  is the processed version of Google's C4 dataset, 
+  dsn = "allenai/c4"
+  print_dataset_size_if_provided(dsn)
+  en = load_dataset("allenai/c4", "en")
+  en.save_to_disk(f'{LOCAL_DISK_MOUNT}/datasets/{dsn.replace("/","_")}')
+except Exception as e:
+  print(e)
 
-# allenai/c4  is the processed version of Google's C4 dataset, 
-dsn = "allenai/c4"
-print_dataset_size_if_provided(dsn)
-en = load_dataset("allenai/c4", "en")
-en.save_to_disk(f'{LOCAL_DISK_MOUNT}/datasets/{dsn.replace("/","_")}')
-
-dsn = "togethercomputer/RedPajama-Data-1T"
-print_dataset_size_if_provided(dsn)
-ds = load_dataset(dsn)
-ds.save_to_disk(f'{LOCAL_DISK_MOUNT}/datasets/{dsn.replace("/","_")}')
+try:
+  dsn = "togethercomputer/RedPajama-Data-1T"
+  print_dataset_size_if_provided(dsn)
+  ds = load_dataset(dsn)
+  ds.save_to_disk(f'{LOCAL_DISK_MOUNT}/datasets/{dsn.replace("/","_")}')
+except Exception as e:
+  print(e)
 
 
