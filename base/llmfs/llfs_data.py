@@ -46,20 +46,20 @@ def create_dataloader(sdir, tokenizer, batch_size=4, max_length=256, stride=128,
                          rank=1):
 
     # Create dataset
-    # books_ds = GPTDatasetV2(sdir, tokenizer, max_length, stride)
+    books_ds = GPTDatasetV2(sdir, tokenizer, max_length, stride)
     sampler = None
     
     # if torch.cuda.device_count() > 1:
     #     sampler = DistributedSampler(dataset, num_replicas=world_size, rank=rank, shuffle=False, 
     #                                  drop_last=False)
 
-    en = load_dataset("allenai/c4", "en", streaming=True)
+    # en = load_dataset("allenai/c4", "en", streaming=True)
 
     # Concatenate both datasets
     # concatenated = concatenate_datasets([en, books_ds]) 
     
     # Create dataloader
-    dataloader = DataLoader(en, batch_size=batch_size, shuffle=shuffle, pin_memory=True,
+    dataloader = DataLoader(books_ds, batch_size=batch_size, shuffle=shuffle, pin_memory=True,
                             drop_last=drop_last, num_workers=num_workers, sampler=sampler)
 
 
