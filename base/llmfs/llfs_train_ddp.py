@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 # coding: utf-8
 import os
+LOCAL_DISK_MOUNT = '/mnt/data'
+if os.path.exists(LOCAL_DISK_MOUNT):
+    os.environ['HF_HOME'] = f'{LOCAL_DISK_MOUNT}/hf_cache/'
+    os.environ['HF_DATASETS_CACHE'] = f'{LOCAL_DISK_MOUNT}/datasets/'
+
 import torch
 import tiktoken
 from torch import nn

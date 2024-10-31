@@ -1,14 +1,16 @@
 import os
+LOCAL_DISK_MOUNT = '/mnt/data'
+if os.path.exists(LOCAL_DISK_MOUNT):
+    os.environ['HF_HOME'] = f'{LOCAL_DISK_MOUNT}/hf_cache/'
+    os.environ['HF_DATASETS_CACHE'] = f'{LOCAL_DISK_MOUNT}/datasets/'
+
 import glob
 import torch
 import tiktoken
 from tqdm import tqdm
 # from torch.utils.data.distributed import DistributedSampler
 from torch.utils.data import DataLoader, IterableDataset
-# from torch.utils.data.distributed import DistributedSampler
-LOCAL_DISK_MOUNT = '/mnt/data'
-os.environ['HF_HOME'] = f'{LOCAL_DISK_MOUNT}/hf_cache/'
-os.environ['HF_DATASETS_CACHE'] = f'{LOCAL_DISK_MOUNT}/datasets/'
+# from torch.utils.data.distributed import DistributedSample
 from datasets import concatenate_datasets, load_dataset
 
 # distributedSampler
