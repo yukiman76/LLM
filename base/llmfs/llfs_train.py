@@ -1,16 +1,25 @@
 #!/usr/bin/env python
 # coding: utf-8
-import glob
+import os
+LOCAL_DISK_MOUNT = '/mnt/data'
+if os.path.exists(LOCAL_DISK_MOUNT):
+    os.environ['HF_HOME'] = f'{LOCAL_DISK_MOUNT}/hf_cache/'
+    os.environ['HF_DATASETS_CACHE'] = f'{LOCAL_DISK_MOUNT}/datasets/'
+
+os.environ["MLFLOW_ENABLE_SYSTEM_METRICS_LOGGING"] = "true"
+import mlflow
 import torch
 import tiktoken
 from torch import nn
 from tqdm import tqdm
 from torch.optim import Adam
+from datetime import datetime
 from importlib.metadata import version
-from torch.utils.data import DataLoader, IterableDataset
 # our tools
+from llfs_data import create_dataloader 
 from llfs_infrence import generate_text, count_parameters
 from llfs_model import LlamaModel2
+from llfs_config import get_config
 
 pkgs = ["matplotlib",
         "torch",
@@ -20,46 +29,6 @@ for p in pkgs:
     print(f"{p} version: {version(p)}")
 
 torch.manual_seed(129)
-
-
-class GPTDatasetV2(IterableDataset):
-    def __init__(self, directory, tokenizer, max_length, stride):
-        self.directory = directory
-        self.tokenizer = tokenizer
-        self.max_length = max_length
-        self.stride = stride
-        self.i_len = len(glob.glob(f"{self.directory}/**/*.md", recursive=True))
-
-    def __iter__(self):
-        docs = glob.glob(f"{self.directory}/**/*.md", recursive=True)
-        with tqdm(docs, unit="document") as tqdocs:
-            for filename in tqdocs:
-                with open(filename, 'r') as f:
-                    txt = f.read()
-                    token_ids = self.tokenizer.encode(txt, allowed_special={"<|endoftext|>"})
-                    for i in range(0, len(token_ids) - self.max_length, self.stride):
-                        input_chunk = token_ids[i:i + self.max_length]
-                        target_chunk = token_ids[i + 1: i + self.max_length + 1]
-                        yield torch.tensor(input_chunk), torch.tensor(target_chunk)
-
-    def size(self):
-        return self.i_len
-
-
-def create_dataloader_v2(sdir, tokenizer, batch_size=4, max_length=256,
-                         stride=128, shuffle=False, drop_last=True, num_workers=0):
-
-    # Create dataset
-    dataset = GPTDatasetV2(sdir, tokenizer, max_length, stride)
-
-    # Create dataloader
-    dataloader = DataLoader(
-        dataset, batch_size=batch_size, shuffle=shuffle,
-        drop_last=drop_last, num_workers=num_workers)
-
-    return dataloader
-
-
     
 device: str = 'cuda' if torch.cuda.is_available() else ('mps' if torch.backends.mps.is_available() else 'cpu')
 print(f"setting device to {device}\n")
@@ -75,69 +44,37 @@ def compute_accuracy(preds, labels):
 
 
 def train(epochs=1):
+    loss_fn = nn.CrossEntropyLoss()
     tokenizer = tiktoken.get_encoding("cl100k_base")
     vocab_size = tokenizer.n_vocab # Use tokenizer's vocab size
-    batch_size = 8
-    # TODO: refactor to a prams class 
-    if device == 'cuda':
-        # -- ver 2
-        embed_dim = 256  # Size of token embeddings
-        num_heads = 8  # Number of attention heads in transformer
-        hidden_dim = 2048  # Size of feedforward layer
-        num_layers = 12  # Number of transformer layers
-        max_seq_length = 512  # Maximum sequence length (context_length)
-        dropout=0.1
+    config = get_config()
 
-        # -- ver 3, LLama3 Nvidia 2x V100  32G
-        if "V100" in torch.cuda.get_device_name(0):
-            print("Using Nvidia 2x V100 GPU config")
-            embed_dim = 256 # Size of token embeddings
-            num_heads = 32 # Number of attention heads in transformer
-            hidden_dim = 2048  # Size of feedforward layer
-            num_layers = 32 # Number of transformer layers
-            max_seq_length = 1024 # vMEM poor -  2048  # Maximum sequence length (context_length)
-            dropout=0.1
+    config['epochs'] = epochs
+    config["learning_rate"] = 1e-3
+    config["metric_function"] = "compute_accuracy"
+    config["optimizer"] = "Adam"
+    config["loss_function"] = loss_fn.__class__.__name__
+    config["tokenizer"] = "cl100k_base" 
 
-        if "4090" in torch.cuda.get_device_name(0):
-            print("Using Nvidia 4x 4090 GPU config")
-            batch_size = 10
-            # -- ver 3, LLama3 nvidia 4 x 4090 24G
-            embed_dim = 256  # Size of token embeddings
-            num_heads = 32  # Number of attention heads in transformer
-            hidden_dim = 4096  # Size of feedforward layer
-            num_layers = 32  # Number of transformer layers
-            max_seq_length = 512  # Maximum sequence length (context_length)
-            dropout=0.1
-        if "H100" in torch.cuda.get_device_name(0):
-            print("Using Nvidia 8x H100 GPU config")
-            batch_size = 75
-            # -- ver 3, LLama3 nvidia 4 x 4090 24G
-            embed_dim = 256  # Size of token embeddings
-            num_heads = 32  # Number of attention heads in transformer
-            hidden_dim = 4096  # Size of feedforward layer
-            num_layers = 32  # Number of transformer layers
-            max_seq_length = 512  # Maximum sequence length (context_length)
-            dropout=0.1
+    print(f"\nConfig:\n{config}")
+    sDate = datetime.now().strftime("%m-%d-%Y-%H-%M-%S")
+    with mlflow.start_run(run_name=f"llfs_train_{sDate}"):
+        # Log training parameters.
+        mlflow.log_params(config)
 
-    else:
-        print("Using default")
-        # -- ver 3, LLama3 nvidia 4 x 4090 24G
-        embed_dim = 256  # Size of token embeddings
-        num_heads = 32  # Number of attention heads in transformer
-        hidden_dim = 4096  # Size of feedforward layer
-        num_layers = 32  # Number of transformer layers
-        max_seq_length = 512  # Maximum sequence length (context_length)
-        dropout=0.1 
+        directory_path = 'data'
 
-    directory_path = 'data'
+        data_loader = create_dataloader(directory_path, tokenizer, batch_size=config['batch_size'],
+                                        max_length=config['max_seq_length'], stride=config['max_seq_length'],
+                                        num_workers=10, world_size=1, rank=0)
 
-    data_loader = create_dataloader_v2(directory_path, tokenizer, batch_size=batch_size,
-                                       max_length=max_seq_length, stride=max_seq_length)
-
-    model = LlamaModel2(vocab_size, embed_dim, hidden_dim, num_layers, num_heads, dropout)
+        model = LlamaModel2(vocab_size, embed_dim=config['embed_dim'], 
+                            hidden_dim=config['hidden_dim'], num_layers=config['num_layers'], 
+                            num_heads=config['num_heads'], dropout=config['dropout'])
 
 
-    # If there are multiple GPUs, wrap the model with nn.DataParallel
+  
+       # If there are multiple GPUs, wrap the model with nn.DataParallel
     if torch.cuda.device_count() > 1:
         print("Let's use", torch.cuda.device_count(), "GPUs!")
         model = nn.DataParallel(model)
@@ -146,7 +83,7 @@ def train(epochs=1):
     model = model.to(device)
     
     criterion = nn.CrossEntropyLoss()
-    optimizer = Adam(model.parameters(), lr=0.001)
+    optimizer = Adam(model.parameters(), lr=config["learning_rate"])
 
     model.train()  # Set model to training mode
     batch_idx = 0
@@ -154,7 +91,7 @@ def train(epochs=1):
     for epoch in range(epochs):
         # total_batches = data_loader.dataset.size()
         with tqdm(data_loader, unit="batch") as tepoch:
-            for data, target in tepoch:
+            for batch, (data, target) in enumerate(tepoch):                
                 tepoch.set_description(f"Epoch {epoch}")
                 
                 data, target = data.to(device), target.to(device)
@@ -163,25 +100,25 @@ def train(epochs=1):
 
                 output = output.view(-1, vocab_size)
                 target = target.view(-1)
-                # loss = nn.functional.cross_entropy(output.view(-1, vocab_size), target.view(-1))
                 loss = criterion(output, target)
-
-                # import IPython
-                # IPython.embed()
 
                 loss.backward()
                 optimizer.step()
-                
+                optimizer.zero_grad()                
                 accuracy = compute_accuracy(output, target)
 
-                # print(f'Epoch {epoch}, Loss {loss.item()}')
                 if float(loss.item()) < 0.06:
+                    # early stop
                     break
 
-                # if batch_idx % 100 == 99:  # Print every 100 batches
-                #     print(f'Epoch [{epoch+1}/{epochs}], Step [{batch_idx+1}/{total_batches}], Loss: {running_loss/100:.4f}, Accuracy: {running_accuracy/100:.4f}')
-                #     running_loss = 0.0
-                #     running_accuracy = 0.0
+                # if batch % 100 == 0:
+                loss, current = loss.item(), batch
+                mlflow.log_metric("loss", f"{loss:3f}", step=(batch // 100))
+                mlflow.log_metric("accuracy", f"{accuracy:3f}", step=(batch // 100))
+                print(
+                    f"Epoch {epoch} loss: {loss:3f} accuracy: {accuracy:3f} [{current} / {len(data_loader)}]"
+                )
+                batch_idx += 1
 
                 batch_idx += 1
                 tepoch.set_postfix(loss=loss.item(), accuracy=100. * accuracy)
@@ -193,7 +130,7 @@ def train(epochs=1):
 
 if __name__ == "__main__":
     #git clone --depth=1 --branch=main https://github.com/mlschmitt/classic-books-markdown data && rm -rf data/.git
-    model, tokenizer = train(8)
+    model, tokenizer = train(1)
 
     import IPython
     IPython.embed()
