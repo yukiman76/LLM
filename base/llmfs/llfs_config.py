@@ -21,7 +21,7 @@ def get_config():
 
     if "4090" in sdevice_name:
         print("Using Nvidia 4090 GPU config")
-        config['batch_size'] = 10
+        config['batch_size'] = 2
         # -- ver 3, LLama3 nvidia 4 x 4090 24G
         config['num_heads'] = 32  # Number of attention heads in transformer
         config['hidden_dim'] = 4096  # Size of feedforward layer
