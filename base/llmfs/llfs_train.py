@@ -86,12 +86,11 @@ def train(epochs=1):
     optimizer = Adam(model.parameters(), lr=config["learning_rate"])
 
     model.train()  # Set model to training mode
-    batch_idx = 0
+    batch = 0
     # Train the model
     for epoch in range(epochs):
-        # total_batches = data_loader.dataset.size()
         with tqdm(data_loader, unit="batch") as tepoch:
-            for batch, (data, target) in enumerate(tepoch):                
+            for data, target in tepoch:                
                 tepoch.set_description(f"Epoch {epoch}")
                 
                 data, target = data.to(device), target.to(device)
@@ -118,9 +117,8 @@ def train(epochs=1):
                 print(
                     f"Epoch {epoch} loss: {loss:3f} accuracy: {accuracy:3f} [{current} / {len(data_loader)}]"
                 )
-                batch_idx += 1
+                batch += 1
 
-                batch_idx += 1
                 tepoch.set_postfix(loss=loss.item(), accuracy=100. * accuracy)
 
 
