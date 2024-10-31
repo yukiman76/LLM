@@ -53,7 +53,7 @@ def create_dataloader(sdir, tokenizer, batch_size=4, max_length=256, stride=128,
     #     sampler = DistributedSampler(dataset, num_replicas=world_size, rank=rank, shuffle=False, 
     #                                  drop_last=False)
 
-    en = load_dataset("allenai/c4", "en", nrows=10)
+    en = load_dataset("allenai/c4", "en", nrows=1000)
 
     # Concatenate both datasets
     concatenated = concatenate_datasets([books_ds, en]) 
