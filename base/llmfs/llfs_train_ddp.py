@@ -12,6 +12,7 @@ import torch
 import tiktoken
 from torch import nn
 from torch.optim import Adam
+from datetime import datetime
 import torch.distributed as dist
 import torch.multiprocessing as mp
 from importlib.metadata import version
@@ -80,7 +81,8 @@ def train_ddp(rank=0, world_size=1, epochs=1):
     config["tokenizer"] = "cl100k_base" 
 
     print(f"\nConfig:\n{config}")
-    with mlflow.start_run():
+    sDate = datetime.now().strftime("%m-%d-%Y-%H-%M-%S")
+    with mlflow.start_run(run_name=f"llfs_train_{sDate}"):
         # Log training parameters.
         mlflow.log_params(config)
 
