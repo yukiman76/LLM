@@ -3,3 +3,4 @@ torch
 matplotlib
 accelerate
 IPython
+mlflow
