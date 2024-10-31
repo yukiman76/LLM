@@ -70,7 +70,7 @@ def train_ddp(rank=0, world_size=1, epochs=1):
     tokenizer = tiktoken.get_encoding("cl100k_base")
     vocab_size = tokenizer.n_vocab # Use tokenizer's vocab size
     config = get_config()
-
+    print(f"\nConfig:\n{config}")
     batch_size = config['batch_size']
     embed_dim = config['embed_dim']
     num_heads = config['num_heads']
@@ -168,6 +168,3 @@ if __name__ == "__main__":
     # print(result)
 
     # print(f'The model has {count_parameters(model):,} trainable parameters')
-
-    import IPython
-    IPython.embed()
