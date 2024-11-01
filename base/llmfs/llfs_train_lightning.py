@@ -77,12 +77,12 @@ def main():
     vocab_size = tokenizer.n_vocab
     config["vocab_size"] = vocab_size
     config["learning_rate"] = 1e-3
-    config["batch_size"] = 32
     config["epochs"] = 1
 
     # Data loader preparation
     data_loader = create_dataloader(
-        'data', tokenizer,
+        sdir='data', 
+        tokenizer=tokenizer,
         batch_size=config['batch_size'],
         max_length=config['max_seq_length'],
         stride=config['max_seq_length'],
