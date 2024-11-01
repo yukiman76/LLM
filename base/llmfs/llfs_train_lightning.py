@@ -8,6 +8,7 @@ from datetime import datetime
 from importlib.metadata import version
 import lightning as L
 from lightning.pytorch.strategies import DDPStrategy
+from lightning.pytorch.loggers import MLFlowLogger
 from llfs_data import create_dataloader
 from llfs_model import LlamaModel2
 from llfs_config import get_config
@@ -89,14 +90,17 @@ def main():
         num_workers=10
     )
 
+    
     # Model initialization
     model = LlamaLightningModule(config=config, vocab_size=vocab_size)
 
     # Set up MLflow tracking
     sDate = datetime.now().strftime("%m-%d-%Y-%H-%M-%S")
     sModelPath = f"llfs_train_{sDate}"
-    mlflow.start_run(run_name=sModelPath)
-    mlflow.log_params(config)
+    # Create out logger
+    mlf_logger = MLFlowLogger(experiment_name=sModelPath, tracking_uri="file:./mlruns")
+    # mlflow.start_run(run_name=sModelPath)
+    # mlflow.log_params(config)
 
     # Trainer for multi-GPU support
     trainer = L.Trainer(
@@ -104,7 +108,9 @@ def main():
         accelerator="gpu",
         max_epochs=config['epochs'],
         strategy=DDPStrategy(find_unused_parameters=False),
-        log_every_n_steps=10
+        log_every_n_steps=10,
+        trategy="ddp",
+        logger=mlf_logger
     )
 
     # Training
