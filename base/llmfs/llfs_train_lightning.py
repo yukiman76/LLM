@@ -65,6 +65,18 @@ class LlamaLightningModule(L.LightningModule):
     def configure_optimizers(self):
         return Adam(self.parameters(), lr=self.hparams.learning_rate)
 
+    def validation_step(self, batch, batch_idx):
+        data, target = batch
+        output = self(data)
+        output = output.view(-1, self.hparams.vocab_size)
+        target = target.view(-1)
+        loss = self.loss_fn(output, target)
+        accuracy = self.compute_accuracy(output, target)
+
+        self.log("val_loss", loss, on_step=True, on_epoch=True, prog_bar=True)
+        self.log("val_accuracy", accuracy, on_step=True, on_epoch=True, prog_bar=True)
+        return loss
+
 
 # Main function to prepare data, model, and run training
 def main():
