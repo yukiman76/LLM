@@ -5,6 +5,8 @@ import lightning as L
 from llfs_model import LlamaModel2
 from llfs_config import get_config
 
+torch.set_float32_matmul_precision('medium') # | 'high')
+
 # Set up local disk cache if necessary
 LOCAL_DISK_MOUNT = '/mnt/data'
 if os.path.exists(LOCAL_DISK_MOUNT):
