@@ -50,7 +50,7 @@ def generate_text(model, tokenizer, seed_text, max_length=100):
             next_token = torch.argmax(next_token_logits, dim=-1)
             output_tokens = torch.cat([output_tokens, next_token.unsqueeze(0)], dim=1)
 
-            if next_token.item() == tokenizer.eos_token_id:
+            if next_token.item() == tokenizer.eot_token:
                 break
 
     generated_text = tokenizer.decode(output_tokens.squeeze().tolist())
