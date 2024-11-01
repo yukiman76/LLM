@@ -109,7 +109,6 @@ def main():
         max_epochs=config['epochs'],
         strategy=DDPStrategy(find_unused_parameters=False),
         log_every_n_steps=10,
-        strategy="ddp",
         logger=mlf_logger
     )
 
