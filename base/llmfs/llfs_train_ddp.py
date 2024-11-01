@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 # coding: utf-8
+# in order to be able to run this, you must have at least four GPU's with a combined the RAM of 128 gigs or more
+# and you must have installed tensorflow-gpu 1.4.0 and keras 2.0.6
+# following the readme to install dependencys 
+# if you have issues with vRAM adjust batch size and number of epochs accordingly
+
 import os
 LOCAL_DISK_MOUNT = '/mnt/data'
 if os.path.exists(LOCAL_DISK_MOUNT):
