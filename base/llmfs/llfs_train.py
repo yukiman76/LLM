@@ -119,7 +119,7 @@ def train(epochs=1):
                 )
                 batch += 1
 
-                tepoch.set_postfix(loss=loss.item(), accuracy=100. * accuracy)
+                tepoch.set_postfix(loss=loss, accuracy=100. * accuracy)
 
 
     torch.save(model.state_dict(), './llmfs_weights.pth')
