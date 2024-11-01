@@ -30,7 +30,9 @@ class LlamaLightningModule(L.LightningModule):
 def load_model(checkpoint_path, config, vocab_size):
     """ Load the trained model from checkpoint """
     model = LlamaLightningModule(config=config, vocab_size=vocab_size)
-    model.load_state_dict(torch.load(checkpoint_path, map_location='cuda' if torch.cuda.is_available() else 'cpu'))
+    model.load_state_dict(torch.load(checkpoint_path, 
+                                     map_location='cuda' if torch.cuda.is_available() else 'cpu',
+                                     weights_only=True))
     model.eval()
     return model
 
