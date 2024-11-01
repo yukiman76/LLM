@@ -53,6 +53,7 @@ def create_dataloader(sdir, tokenizer, batch_size=4, max_length=256, stride=128,
     #     sampler = DistributedSampler(dataset, num_replicas=world_size, rank=rank, shuffle=False, 
     #                                  drop_last=False)
 
+    # owt =  load_dataset("openwebtext") 
     # en = load_dataset("allenai/c4", "en", split="train", streaming=True)
     # en = en.take(1_000)
     # Concatenate both datasets
