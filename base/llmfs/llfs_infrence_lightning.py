@@ -1,4 +1,8 @@
 import os
+os.environ['HF_HOME'] = '/mnt/data/hf_cache/'
+os.environ['HF_DATASETS_CACHE'] = '/mnt/data/datasets/'
+os.environ["MLFLOW_ENABLE_SYSTEM_METRICS_LOGGING"] = "true"
+
 import torch
 import tiktoken
 import lightning as L
@@ -6,13 +10,6 @@ from llfs_model import LlamaModel2
 from llfs_config import get_config
 
 torch.set_float32_matmul_precision('medium') # | 'high')
-
-# Set up local disk cache if necessary
-LOCAL_DISK_MOUNT = '/mnt/data'
-if os.path.exists(LOCAL_DISK_MOUNT):
-    os.environ['HF_HOME'] = f'{LOCAL_DISK_MOUNT}/hf_cache/'
-    os.environ['HF_DATASETS_CACHE'] = f'{LOCAL_DISK_MOUNT}/datasets/'
-
 class LlamaLightningModule(L.LightningModule):
     def __init__(self, config, vocab_size):
         super().__init__()

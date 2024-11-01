@@ -1,5 +1,9 @@
 import os
 import torch
+os.environ['HF_HOME'] = '/mnt/data/hf_cache/'
+os.environ['HF_DATASETS_CACHE'] = '/mnt/data/datasets/'
+os.environ["MLFLOW_ENABLE_SYSTEM_METRICS_LOGGING"] = "true"
+
 import mlflow
 import tiktoken
 from torch import nn
@@ -12,14 +16,6 @@ from lightning.pytorch.loggers import MLFlowLogger
 from llfs_data import create_dataloader
 from llfs_model import LlamaModel2
 from llfs_config import get_config
-
-# Configurations for local disk mount and caching
-LOCAL_DISK_MOUNT = '/mnt/data'
-if os.path.exists(LOCAL_DISK_MOUNT):
-    os.environ['HF_HOME'] = f'{LOCAL_DISK_MOUNT}/hf_cache/'
-    os.environ['HF_DATASETS_CACHE'] = f'{LOCAL_DISK_MOUNT}/datasets/'
-
-os.environ["MLFLOW_ENABLE_SYSTEM_METRICS_LOGGING"] = "true"
 
 pkgs = ["matplotlib", "torch", "tiktoken"]
 for p in pkgs:
@@ -90,7 +86,7 @@ def main():
         batch_size=config['batch_size'],
         max_length=config['max_seq_length'],
         stride=config['max_seq_length'],
-        num_workers=10
+        num_workers=int(os.cpu_count() /1.5) # we want to use most of the CPU's to handle data loading
     )
 
     

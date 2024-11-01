@@ -1,8 +1,7 @@
 import os
-LOCAL_DISK_MOUNT = '/mnt/data'
-if os.path.exists(LOCAL_DISK_MOUNT):
-    os.environ['HF_HOME'] = f'{LOCAL_DISK_MOUNT}/hf_cache/'
-    os.environ['HF_DATASETS_CACHE'] = f'{LOCAL_DISK_MOUNT}/datasets/'
+os.environ['HF_HOME'] = '/mnt/data/hf_cache/'
+os.environ['HF_DATASETS_CACHE'] = '/mnt/data/datasets/'
+os.environ["MLFLOW_ENABLE_SYSTEM_METRICS_LOGGING"] = "true"
 
 import glob
 import torch
@@ -11,7 +10,7 @@ from tqdm import tqdm
 # from torch.utils.data.distributed import DistributedSampler
 from torch.utils.data import DataLoader, IterableDataset
 # from torch.utils.data.distributed import DistributedSample
-from datasets import concatenate_datasets, load_dataset
+# from datasets import concatenate_datasets, load_dataset
 
 # distributedSampler
 
