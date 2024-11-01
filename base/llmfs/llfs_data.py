@@ -25,24 +25,24 @@ class GPTDatasetV2(IterableDataset):
         self.i_len = len(self.docs)
 
     def __iter__(self):
-        with tqdm(self.docs, unit="document") as tqdocs:
-            for filename in tqdocs:
-                with open(filename, 'r') as f:
-                    txt = f.read()
-                    token_ids = self.tokenizer.encode(txt, allowed_special={"<|endoftext|>"})
-                    eot_token_id = self.tokenizer.eos_token_id if hasattr(self.tokenizer, 'eos_token_id') else None
-                    if eot_token_id is not None:
-                        token_ids.append(eot_token_id)
-                    for i in range(0, len(token_ids) - self.max_length, self.stride):
-                        input_chunk = token_ids[i:i + self.max_length]
-                        target_chunk = token_ids[i + 1: i + self.max_length + 1]
-                        yield torch.tensor(input_chunk), torch.tensor(target_chunk)
+        # with tqdm(self.docs, unit="document") as tqdocs:
+        for filename in self.docs:
+            with open(filename, 'r') as f:
+                txt = f.read()
+                token_ids = self.tokenizer.encode(txt, allowed_special={"<|endoftext|>"})
+                eot_token_id = self.tokenizer.eos_token_id if hasattr(self.tokenizer, 'eos_token_id') else None
+                if eot_token_id is not None:
+                    token_ids.append(eot_token_id)
+                for i in range(0, len(token_ids) - self.max_length, self.stride):
+                    input_chunk = token_ids[i:i + self.max_length]
+                    target_chunk = token_ids[i + 1: i + self.max_length + 1]
+                    yield torch.tensor(input_chunk), torch.tensor(target_chunk)
 
-    def size(self):
-        return self.i_len
+    # def size(self):
+    #     return self.i_len
 
-    def __len__(self):
-        return  self.i_len
+    # def __len__(self):
+    #     return  self.i_len
 
 def create_dataloader(sdir, tokenizer, batch_size=4, max_length=256, stride=128, 
                          shuffle=False, drop_last=True, num_workers=0, world_size=2,  
