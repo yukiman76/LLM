@@ -6,9 +6,8 @@ from torch import nn
 from torch.optim import Adam
 from datetime import datetime
 from importlib.metadata import version
-import pytorch_lightning as pl
-from pytorch_lightning import Trainer
-from pytorch_lightning.plugins import DDPPlugin
+import lightning as L
+from lightning.pytorch.strategies import DDPStrategy
 from llfs_data import create_dataloader
 from llfs_model import LlamaModel2
 from llfs_config import get_config
@@ -28,7 +27,7 @@ for p in pkgs:
 torch.manual_seed(129)
 
 # Lightning Module for Training
-class LlamaLightningModule(pl.LightningModule):
+class LlamaLightningModule(L.LightningModule):
     def __init__(self, config, vocab_size):
         super().__init__()
         self.model = LlamaModel2(
@@ -100,10 +99,11 @@ def main():
     mlflow.log_params(config)
 
     # Trainer for multi-GPU support
-    trainer = Trainer(
-        gpus=torch.cuda.device_count(),
+    trainer = L.Trainer(
+        devices=torch.cuda.device_count(),
+        accelerator="gpu",
         max_epochs=config['epochs'],
-        strategy=DDPPlugin(find_unused_parameters=False),
+        strategy=DDPStrategy(find_unused_parameters=False),
         log_every_n_steps=10
     )
 
