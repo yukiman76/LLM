@@ -29,10 +29,10 @@ torch.manual_seed(129)
 
 # Lightning Module for Training
 class LlamaLightningModule(L.LightningModule):
-    def __init__(self, config, vocab_size):
+    def __init__(self, config):
         super().__init__()
         self.model = LlamaModel2(
-            vocab_size,
+            vocab_size=config['vocab_size'],
             embed_dim=config['embed_dim'],
             hidden_dim=config['hidden_dim'],
             num_layers=config['num_layers'],
@@ -75,8 +75,11 @@ def main():
     # Load configuration and set parameters
     config = get_config()
     tokenizer = tiktoken.get_encoding("cl100k_base")
-    vocab_size = tokenizer.n_vocab
-    config["vocab_size"] = vocab_size
+    tokenizer.pad_token = tokenizer.eot_token
+    tokenizer.padding_side = "right"  
+    tokenizer.eos_token_id = tokenizer.eot_token 
+
+    config["vocab_size"] = tokenizer.n_vocab
     config["learning_rate"] = 1e-3
     config["epochs"] = 1
 
@@ -92,7 +95,7 @@ def main():
 
     
     # Model initialization
-    model = LlamaLightningModule(config=config, vocab_size=vocab_size)
+    model = LlamaLightningModule(config=config)
 
     # Set up MLflow tracking
     sDate = datetime.now().strftime("%m-%d-%Y-%H-%M-%S")

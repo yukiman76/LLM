@@ -30,6 +30,9 @@ class GPTDatasetV2(IterableDataset):
                 with open(filename, 'r') as f:
                     txt = f.read()
                     token_ids = self.tokenizer.encode(txt, allowed_special={"<|endoftext|>"})
+                    eot_token_id = tokenizer.eos_token_id if hasattr(tokenizer, 'eos_token_id') else None
+                    if eot_token_id is not None:
+                        token_ids.append(eot_token_id)
                     for i in range(0, len(token_ids) - self.max_length, self.stride):
                         input_chunk = token_ids[i:i + self.max_length]
                         target_chunk = token_ids[i + 1: i + self.max_length + 1]

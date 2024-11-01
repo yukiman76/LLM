@@ -53,6 +53,7 @@ def generate_text(model, tokenizer, seed_text, max_length=100):
             output_tokens = torch.cat([output_tokens, next_token.unsqueeze(0)], dim=1)
 
             if next_token.item() == tokenizer.eot_token:
+                print("eot_token reached")
                 break
 
     generated_text = tokenizer.decode(output_tokens.squeeze().tolist())
@@ -62,6 +63,10 @@ def main(checkpoint_path="llmfs_weights.pth", seed_text="Once upon a time"):
     # Load the configuration and tokenizer
     config = get_config()
     tokenizer = tiktoken.get_encoding("cl100k_base")
+    tokenizer.pad_token = tokenizer.eot_token
+    tokenizer.padding_side = "right"  
+    tokenizer.eos_token_id = tokenizer.eot_token 
+
     vocab_size = tokenizer.n_vocab
 
     # Load the trained model
@@ -79,3 +84,6 @@ if __name__ == "__main__":
     m_output_dir = m_output_dir.lstrip().rstrip()
 
     main(checkpoint_path=m_output_dir)
+
+    import IPython
+    IPython.embed()
