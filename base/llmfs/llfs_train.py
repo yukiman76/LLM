@@ -122,7 +122,9 @@ def train(epochs=1):
                 tepoch.set_postfix(loss=loss, accuracy=100. * accuracy)
 
 
-    torch.save(model.state_dict(), './llmfs_weights.pth')
+    torch.save(model.state_dict(), f"./llmfs_weights_{sDate}.pth")
+    # Save the trained model to MLflow.
+    mlflow.pytorch.log_model(model, "model")
     return model, tokenizer
 
 

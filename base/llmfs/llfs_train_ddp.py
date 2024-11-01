@@ -87,7 +87,16 @@ def train_ddp(rank=0, world_size=1, epochs=1):
 
     print(f"\nConfig:\n{config}")
     sDate = datetime.now().strftime("%m-%d-%Y-%H-%M-%S")
-    with mlflow.start_run(run_name=f"llfs_train_{sDate}"):
+    sModelPath = f"llfs_train_{sDate}"
+
+    run_object = mlflow.search_runs(filter_string=f"attributes.run_name = '{sModelPath}'")
+    if not run_object.empty:
+        run_id = run_object["run_id"]
+        mlflow_run = mlflow.start_run(run_id=run_id[0])
+    else:
+        mlflow_run =  mlflow.start_run(run_name=sModelPath)
+
+    with mlflow_run:
         # Log training parameters.
         mlflow.log_params(config)
 
@@ -147,7 +156,8 @@ def train_ddp(rank=0, world_size=1, epochs=1):
                 batch_idx += 1
 
 
-        torch.save(model.state_dict(), './llmfs_weights.pth')
+        torch.save(model.state_dict(), f"./llmfs_weights_{sDate}.pth")
+        # torch.save(model.state_dict(), './llmfs_weights.pth')
         # Save the trained model to MLflow.
         mlflow.pytorch.log_model(model, "model")
 
