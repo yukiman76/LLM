@@ -22,6 +22,8 @@ class LlamaLightningModule(L.LightningModule):
             num_heads=config['num_heads'],
             dropout=config['dropout']
         )
+        # add preformance boosting
+        self.model = torch.compile(self.model)
         self.config = config
 
     def forward(self, x):
