@@ -73,7 +73,7 @@ def main(checkpoint_path="llmfs_weights.pth", seed_text="Once upon a time"):
 if __name__ == "__main__":
     m_output_dir = input("What is the model file : ")
     if m_output_dir == "":
-        m_output_dir  = "llmfs_weights.pth" 
+        m_output_dir  = "llmfs_weights_11-01-2024-07-47-47.pth" 
     m_output_dir = m_output_dir.lstrip().rstrip()
 
     main(checkpoint_path=m_output_dir)
