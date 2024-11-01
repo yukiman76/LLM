@@ -1,3 +1,5 @@
+import torch
+from torch import nn
 from transformers import LlamaTokenizer, LlamaConfig, LlamaForCausalLM, Trainer, TrainingArguments
 from transformers import DataCollatorForLanguageModeling
 from datasets import load_dataset
@@ -32,6 +34,10 @@ config = LlamaConfig(
 )
 
 model = LlamaForCausalLM(config)  # Initialize model with random weights
+
+if torch.cuda.device_count() > 1:
+    print("Let's use", torch.cuda.device_count(), "GPUs!")
+    model = nn.DataParallel(model)
 
 # Step 5: Set Up Data Collator for Causal Language Modeling
 data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
