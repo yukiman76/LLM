@@ -1,5 +1,5 @@
-import torch
 from transformers import LlamaTokenizer, LlamaConfig, LlamaForCausalLM, Trainer, TrainingArguments
+from transformers import DataCollatorForLanguageModeling
 from datasets import load_dataset
 
 # Step 1: Load and Preprocess the Dataset
@@ -34,7 +34,6 @@ config = LlamaConfig(
 model = LlamaForCausalLM(config)  # Initialize model with random weights
 
 # Step 5: Set Up Data Collator for Causal Language Modeling
-from transformers import DataCollatorForLanguageModeling
 data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
 
 # Step 6: Define Training Arguments
@@ -42,8 +41,8 @@ training_args = TrainingArguments(
     output_dir="./llama2_scratch_model",
     evaluation_strategy="epoch",
     learning_rate=1e-4,
-    per_device_train_batch_size=2,  # Adjust based on GPU memory
-    per_device_eval_batch_size=2,
+    per_device_train_batch_size=1,  # Adjust based on GPU memory
+    per_device_eval_batch_size=1,
     num_train_epochs=10,
     weight_decay=0.1,
     save_steps=10_000,
