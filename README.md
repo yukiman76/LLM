@@ -6,7 +6,9 @@ Welcome to the LLM  repository, where we develop, train and fine tune large lang
 **About**
 --------
 
-This repository contains the implementation and training code for our large language model, including model architectures, training scripts, and evaluation metrics. The model is designed to learn from large amounts of text data and generate human-like language outputs.
+Searching the web for resources on how to develop your own LLM's from scratch and then fine tune in an iterative process is overly complex I wanted to single place where I and others can learn and share is valuable knowledge, This repository contains the implementation and training code for a large language model, including model architectures, training scripts, and evaluation metrics. This repo is designed to assist in the learning of how Large Language models are trained on large amounts of text data and generate human-like language outputs. This is an ongoing effort as the AI world changes so must this resource 
+
+
 
 **Getting Started**
 --------------------
