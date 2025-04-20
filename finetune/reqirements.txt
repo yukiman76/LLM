@@ -1,0 +1,22 @@
+# Core dependencies
+torch>=2.0.0
+transformers>=4.30.0
+peft>=0.5.0
+trl>=0.7.0
+accelerate>=0.22.0
+bitsandbytes>=0.41.0
+
+# Data processing
+datasets>=2.12.0
+numpy>=1.24.0
+
+# Utilities
+tqdm>=4.65.0
+tensorboard>=2.13.0
+wandb>=0.15.0
+scipy>=1.10.0
+scikit-learn>=1.2.0
+sentencepiece>=0.1.99
+
+# Optional dependencies
+flash-attn>=2.0.0; platform_system != "Darwin" or platform_machine != "arm64"

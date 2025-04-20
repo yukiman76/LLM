@@ -10,7 +10,10 @@ def get_config():
         'max_seq_length': 512,  # Maximum sequence length (context_length)
         'dropout': 0.1,
     }
-    sdevice_name = torch.cuda.get_device_name(0) 
+    try:
+        sdevice_name = torch.cuda.get_device_name(0) 
+    except:
+        sdevice_name = "4090"
         # -- ver 3, LLama3 Nvidia 2x V100  32G
     if "V100" in sdevice_name:
         print("Using Nvidia V100 GPU config")
@@ -27,7 +30,7 @@ def get_config():
         config['hidden_dim'] = 4096  # Size of feedforward layer
         config['num_layers'] = 32  # Number of transformer layers
 
-    if "H100" in torch.cuda.get_device_name(0):
+    if "H100" in sdevice_name:
         print("Using Nvidia H100 GPU config")
         config['batch_size'] = 8
         config['embed_dim'] = 256  # Size of token embeddings

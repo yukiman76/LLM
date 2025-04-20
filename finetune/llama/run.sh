@@ -1,0 +1,11 @@
+python ../train.py \
+  --model_name_or_path "meta-llama/Llama-2-7b-hf" \
+  --peft_mode "lora" \
+  --lora_r 16 \
+  --lora_alpha 32 \
+  --train_file "../data/test_data.jsonl" \
+  --per_device_train_batch_size 4 \
+  --gradient_accumulation_steps 8 \
+  --learning_rate 2e-5 \
+  --num_train_epochs 3 \
+  --output_dir "./lora_llama_output"

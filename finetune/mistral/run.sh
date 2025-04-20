@@ -1,0 +1,12 @@
+python ../train.py \
+  --model_name_or_path "mistralai/Mistral-7B-Instruct-v0.2" \
+  --peft_mode "qlora" \
+  --quantization_bit 4 \
+  --lora_r 16 \
+  --lora_alpha 32 \
+  --train_file "../data/test_data.jsonl" \
+  --per_device_train_batch_size 2 \
+  --gradient_accumulation_steps 16 \
+  --learning_rate 1e-4 \
+  --num_train_epochs 3 \
+  --output_dir "./qlora_mistral_output"
